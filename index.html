@@ -1,0 +1,2466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APAVAN Pórtico Protendido v2.6</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0a1420;--panel:#0f1d2e;--panel2:#152438;--panel3:#1b2d44;--border:#1e3a56;
+--txt:#e2ecf5;--dim:#8ba3bc;--accent:#00d4ff;--accent2:#ff8a3d;--ok:#22c55e;--warn:#f59e0b;--err:#ef4444}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+background:var(--bg);color:var(--txt);font-size:13px;-webkit-user-select:none;user-select:none}
+body{display:flex;flex-direction:column}
+header{background:linear-gradient(90deg,#0a1420,#152438);border-bottom:1px solid var(--border);
+padding:8px 14px;display:flex;align-items:center;gap:14px;flex-shrink:0;flex-wrap:wrap}
+.logo{display:flex;flex-direction:column;line-height:1}
+.logo b{font-weight:800;font-size:17px;letter-spacing:1px;
+background:linear-gradient(90deg,#00d4ff,#ff8a3d);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo span{font-size:8.5px;color:var(--dim);letter-spacing:0.8px;margin-top:2px}
+.title{font-size:13px;color:var(--dim);padding-left:12px;border-left:1px solid var(--border)}
+.title b{color:var(--txt);font-weight:600}
+.tabs{display:flex;gap:3px;margin-left:auto;flex-wrap:wrap}
+.tab{padding:6px 11px;border-radius:6px;background:transparent;border:1px solid transparent;
+color:var(--dim);cursor:pointer;font-size:11.5px;transition:all .15s;white-space:nowrap;font-weight:500}
+.tab:hover{color:var(--txt);background:var(--panel2)}
+.tab.active{background:var(--accent);color:#001a26;font-weight:700;border-color:var(--accent)}
+.main{display:flex;flex:1;overflow:hidden;min-height:0}
+.sidebar{width:340px;background:var(--panel);border-right:1px solid var(--border);
+overflow-y:auto;flex-shrink:0;padding:10px}
+.results{width:300px;background:var(--panel);border-left:1px solid var(--border);
+overflow-y:auto;flex-shrink:0;padding:10px}
+.canvas-area{flex:1;position:relative;background:#06101a;overflow:hidden;min-width:0}
+canvas{display:block;width:100%;height:100%;cursor:crosshair}
+.panel-sec{margin-bottom:10px;border:1px solid var(--border);border-radius:8px;
+background:var(--panel2);overflow:hidden}
+.panel-head{padding:8px 10px;font-size:11px;font-weight:700;letter-spacing:0.5px;
+color:var(--accent);text-transform:uppercase;border-bottom:1px solid var(--border);
+background:var(--panel3);cursor:pointer}
+.panel-body{padding:9px}
+.field{margin-bottom:7px}
+.field label{display:block;font-size:10.5px;color:var(--dim);margin-bottom:3px;font-weight:500}
+.field input,.field select{width:100%;padding:6px 8px;background:var(--bg);border:1px solid var(--border);
+border-radius:5px;color:var(--txt);font-size:12px;font-family:inherit;outline:none}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.btn{padding:8px 10px;background:var(--panel3);border:1px solid var(--border);border-radius:6px;
+color:var(--txt);cursor:pointer;font-size:11.5px;font-weight:600;width:100%;transition:all .15s;
+font-family:inherit;text-align:center;display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:6px}
+.btn:hover{background:var(--border);border-color:var(--accent)}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:linear-gradient(135deg,#00a8cc,#00d4ff);color:#001a26;border:none}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.accent2{background:linear-gradient(135deg,#d97706,#ff8a3d);color:#001a26;border:none}
+.btn.success{background:linear-gradient(135deg,#16a34a,#22c55e);color:#001a26;border:none}
+.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
+.stat{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--panel3);
+font-size:12px}
+.stat:last-child{border:none}
+.stat span:first-child{color:var(--dim)}
+.stat span:last-child{color:var(--txt);font-weight:600;font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;
+font-size:10px;font-weight:700}
+.badge.ok{background:rgba(34,197,94,.15);color:var(--ok)}
+.badge.warn{background:rgba(245,158,11,.15);color:var(--warn)}
+.badge.err{background:rgba(239,68,68,.15);color:var(--err)}
+.toolbar{position:absolute;top:10px;left:10px;display:flex;gap:5px;z-index:5;flex-wrap:wrap;max-width:calc(100% - 260px)}
+.toolbar button{background:var(--panel2);border:1px solid var(--border);color:var(--txt);
+padding:6px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;
+font-family:inherit;transition:all .15s}
+.toolbar button:hover{background:var(--panel3);border-color:var(--accent)}
+.toolbar button.active{background:var(--accent);color:#001a26;border-color:var(--accent)}
+.toolbar button.play{background:linear-gradient(135deg,#16a34a,#22c55e);color:#001a26;border:none;font-weight:700}
+.toolbar button.play.active{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff}
+.legend{position:absolute;bottom:10px;left:10px;background:rgba(15,29,46,.92);border:1px solid var(--border);
+border-radius:6px;padding:8px 10px;font-size:10.5px;color:var(--dim);z-index:5;
+display:flex;gap:12px;flex-wrap:wrap;max-width:calc(100% - 20px)}
+.legend b{color:var(--txt);font-weight:600}
+.legend .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.zoom-info{position:absolute;top:10px;right:10px;background:rgba(15,29,46,.92);border:1px solid var(--border);
+border-radius:6px;padding:5px 9px;font-size:10.5px;color:var(--dim);z-index:5}
+.diagram-tabs{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap}
+.diagram-tabs button{flex:1;min-width:55px;padding:5px 8px;background:var(--panel3);
+border:1px solid var(--border);border-radius:5px;color:var(--dim);cursor:pointer;font-size:11px;
+font-weight:600;font-family:inherit;transition:all .15s}
+.diagram-tabs button.active{background:var(--accent);color:#001a26;border-color:var(--accent)}
+.diagram-tabs button:hover:not(.active){color:var(--txt);border-color:var(--accent)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel3);
+border:1px solid var(--accent);border-radius:8px;padding:10px 16px;font-size:12px;
+color:var(--txt);z-index:1000;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:90vw}
+.toast.err{border-color:var(--err)}
+.toast.warn{border-color:var(--warn)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;display:none;
+align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-inner{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+max-width:900px;width:100%;max-height:90vh;overflow:auto;padding:20px}
+.modal-inner h2{font-size:16px;margin-bottom:12px;color:var(--accent)}
+.modal-inner h3{font-size:13px;margin:12px 0 6px;color:var(--accent2)}
+.modal-inner p{font-size:12px;line-height:1.6;color:var(--txt);margin-bottom:8px}
+.modal-inner table{width:100%;border-collapse:collapse;font-size:11.5px;margin:8px 0}
+.modal-inner th,.modal-inner td{padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)}
+.modal-inner th{background:var(--panel3);color:var(--accent);font-weight:700;font-size:10.5px;
+text-transform:uppercase}
+.close-x{float:right;background:transparent;border:none;color:var(--dim);font-size:20px;cursor:pointer;
+padding:0;line-height:1;font-family:inherit}
+.close-x:hover{color:var(--err)}
+.hint{font-size:10px;color:var(--dim);line-height:1.4;margin-top:4px;font-style:italic}
+.warn-box{background:rgba(245,158,11,.08);border-left:3px solid var(--warn);padding:6px 9px;
+font-size:10.5px;color:var(--warn);border-radius:4px;margin:6px 0;line-height:1.4}
+.info-box{background:rgba(0,212,255,.06);border-left:3px solid var(--accent);padding:6px 9px;
+font-size:10.5px;color:var(--txt);border-radius:4px;margin:6px 0;line-height:1.5}
+.success-box{background:rgba(34,197,94,.06);border-left:3px solid var(--ok);padding:6px 9px;
+font-size:10.5px;color:var(--txt);border-radius:4px;margin:6px 0}
+.err-box{background:rgba(239,68,68,.08);border-left:3px solid var(--err);padding:6px 9px;
+font-size:10.5px;color:#fca5a5;border-radius:4px;margin:6px 0}
+.formula{background:#04101c;border:1px dashed var(--border);border-radius:6px;padding:10px;
+text-align:center;font-family:'Cambria Math','Times New Roman',serif;font-size:15px;
+color:var(--accent);margin:8px 0}
+.formula .var{color:var(--accent2);font-style:italic}
+.stat-big{background:var(--panel3);border:1px solid var(--border);border-radius:8px;padding:10px;
+margin-bottom:8px}
+.stat-big .label{font-size:9.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.stat-big .val{font-size:19px;font-weight:700;color:var(--accent);margin-top:3px;font-variant-numeric:tabular-nums}
+.stat-big .unit{font-size:11px;color:var(--dim);font-weight:400;margin-left:3px}
+.stat-big.green .val{color:var(--ok)}
+.stat-big.orange .val{color:var(--accent2)}
+.stat-big.red .val{color:var(--err)}
+.balance-bar{height:22px;background:var(--bg);border:1px solid var(--border);border-radius:11px;
+position:relative;overflow:hidden;margin:6px 0}
+.balance-bar .fill{height:100%;background:linear-gradient(90deg,#22c55e,#00d4ff);transition:width .3s}
+.balance-bar .target{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--accent2)}
+.balance-bar .pct-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+font-size:11px;font-weight:700;color:#001a26}
+.chk-row{display:flex;align-items:center;gap:6px;padding:5px 0;font-size:12px}
+.chk-row input[type="checkbox"]{width:16px;height:16px;accent-color:var(--accent)}
+table.extremos{width:100%;font-size:10.5px;border-collapse:collapse}
+table.extremos th{padding:5px 6px;background:var(--panel3);color:var(--accent);
+text-transform:uppercase;font-size:9.5px;border-bottom:1px solid var(--border)}
+table.extremos td{padding:5px 6px;border-bottom:1px solid var(--panel3);font-family:monospace}
+table.extremos td:first-child{font-family:inherit;font-size:11px}
+.tag{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9.5px;font-weight:700}
+.tag.anc{background:rgba(255,138,61,.2);color:#ff8a3d}
+.tag.sup{background:rgba(168,85,247,.2);color:#a855f7}
+.tag.bal{background:rgba(239,68,68,.2);color:#ef4444}
+@media (max-width:900px){.sidebar{width:260px}.results{width:250px}.title{display:none}.tab{padding:5px 8px;font-size:10.5px}}
+@media (max-width:700px){.main{flex-direction:column}.sidebar{width:100%;max-height:40vh;border-right:none;border-bottom:1px solid var(--border)}.results{width:100%;max-height:32vh;border-left:none;border-top:1px solid var(--border)}.canvas-area{min-height:200px}}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><b>APAVAN</b><span>ENGENHARIA E CONSULTORIA</span></div>
+  <div class="title"><b>Pórtico Protendido</b> · Simulador</div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="modelo">Modelo</button>
+    <button class="tab" data-tab="protensao">Protensão</button>
+    <button class="tab" data-tab="analise">Análise</button>
+    <button class="tab" data-tab="balance">⚖ Balanceamento</button>
+    <button class="tab" data-tab="diagramas">Diagramas</button>
+    <button class="tab" data-tab="aula">🎓 Aula</button>
+  </nav>
+</header>
+
+<div class="main">
+  <aside class="sidebar"><div id="sidebarContent"></div></aside>
+  <main class="canvas-area">
+    <div class="toolbar">
+      <button id="btnZoomIn">＋</button>
+      <button id="btnZoomOut">−</button>
+      <button id="btnFit">⊡ Ajustar</button>
+      <button id="btnDeform" class="active">📈 Deformada</button>
+      <button id="btnLoads" class="active">↓ Cargas</button>
+      <button id="btnCables" class="active">〰 Cabos</button>
+      <button id="btnIds" class="active">🏷 IDs</button>
+      <button id="btnReactions" class="active">⚖ Reações</button>
+      <button id="btnInternalNodes" class="active">🔵 Nós</button>
+      <button id="btnDiagValues" class="active">🔢 Valores</button>
+      <button id="btnPlay" class="play">▶ Simular</button>
+      <button id="btnResetAnim">↻</button>
+    </div>
+    <div class="zoom-info" id="zoomInfo">100%</div>
+    <canvas id="cv"></canvas>
+    <div class="legend" id="legend"></div>
+  </main>
+  <aside class="results"><div id="resultsContent"></div></aside>
+</div>
+
+<div class="modal" id="modal"><div class="modal-inner"><button class="close-x" onclick="closeModal()">×</button><div id="modalBody"></div></div></div>
+
+<script>
+'use strict';
+
+// ==========================================================================
+// LIMPEZA (sem tocar em serviceWorker — evita o aviso file:// do Chrome)
+// ==========================================================================
+(function cleanup(){
+  try{
+    document.querySelectorAll('link[rel="manifest"]').forEach(el => el.remove());
+    document.querySelectorAll(
+      'meta[name="theme-color"],' +
+      'meta[name="apple-mobile-web-app-capable"],' +
+      'meta[name="apple-mobile-web-app-status-bar-style"],' +
+      'meta[name="apple-mobile-web-app-title"],' +
+      'meta[name="mobile-web-app-capable"]'
+    ).forEach(el => el.remove());
+  }catch(e){}
+})();
+
+console.log('%c APAVAN v2.6 ', 'background:#00d4ff;color:#001a26;font-weight:bold;padding:2px 6px;border-radius:3px');
+
+function safeGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function safeSet(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } }
+
+// ==========================================================================
+// ÁLGEBRA
+// ==========================================================================
+function zeros(n,m){const A=[];for(let i=0;i<n;i++)A.push(new Array(m).fill(0));return A;}
+function matT(A){const n=A.length,m=A[0].length,B=zeros(m,n);
+  for(let i=0;i<n;i++)for(let j=0;j<m;j++)B[j][i]=A[i][j];return B;}
+function matMul(A,B){const n=A.length,m=B[0].length,k=B.length,C=zeros(n,m);
+  for(let i=0;i<n;i++)for(let j=0;j<m;j++){let s=0;for(let t=0;t<k;t++)s+=A[i][t]*B[t][j];C[i][j]=s;}return C;}
+function matVec(A,v){const n=A.length,r=new Array(n).fill(0);
+  for(let i=0;i<n;i++){let s=0;for(let j=0;j<v.length;j++)s+=A[i][j]*v[j];r[i]=s;}return r;}
+function solveLinear(A,b){
+  const n=A.length,M=A.map((r,i)=>r.concat([b[i]]));
+  for(let c=0;c<n;c++){
+    let piv=c,mx=Math.abs(M[c][c]);
+    for(let r=c+1;r<n;r++)if(Math.abs(M[r][c])>mx){mx=Math.abs(M[r][c]);piv=r;}
+    if(mx<1e-14)return null;
+    if(piv!==c){const t=M[c];M[c]=M[piv];M[piv]=t;}
+    const pc=M[c][c];
+    for(let r=c+1;r<n;r++){const f=M[r][c]/pc;if(f===0)continue;
+      for(let k=c;k<=n;k++)M[r][k]-=f*M[c][k];}
+  }
+  const x=new Array(n).fill(0);
+  for(let i=n-1;i>=0;i--){let s=M[i][n];for(let j=i+1;j<n;j++)s-=M[i][j]*x[j];x[i]=s/M[i][i];}
+  return x;
+}
+
+// ==========================================================================
+// MATERIAIS
+// ==========================================================================
+const CONCRETE=[20,25,30,35,40,45,50,55,60,70,80,90];
+function concProps(fck){
+  const Eci=5600*Math.sqrt(fck);
+  const ai=Math.min(1.0,0.8+0.2*fck/80);
+  const Ecs=ai*Eci;
+  const fctm=fck<=50?0.3*Math.pow(fck,2/3):2.12*Math.log(1+0.11*fck);
+  const fctk=0.7*fctm;
+  return {fck,Eci,Ecs,fctm,fctk,fcd:fck/1.4,fctd:fctk/1.4,g:25};
+}
+const CORD_OPTIONS = {
+  'CP-190-RB-12.7': {fpk:1900, Es:195000, diam_mm:12.7, area_mm2:100.9, mass_kg_m:0.890, nome:'CP-190-RB Ø12,7 mm'},
+  'CP-190-RB-15.2': {fpk:1900, Es:195000, diam_mm:15.2, area_mm2:143.4, mass_kg_m:1.240, nome:'CP-190-RB Ø15,2 mm'},
+  'CP-210-RB-12.7': {fpk:2100, Es:195000, diam_mm:12.7, area_mm2:100.9, mass_kg_m:0.890, nome:'CP-210-RB Ø12,7 mm'}
+};
+function rectProps(b,h){
+  const A=b*h,I=b*h*h*h/12,W=I/(h/2);
+  return {A,I,W,ySup:h/2,yInf:h/2,b,h};
+}
+
+// ==========================================================================
+// CABO — Hermite cúbica
+// ==========================================================================
+function cableY(x, cab, L){
+  const LsL = Math.min(Math.max(cab.LsLeft ?? 0, 0), L*0.4);
+  const LsR = Math.min(Math.max(cab.LsRight ?? 0, 0), L*0.4);
+  const eL = cab.eLeft ?? 0, eR = cab.eRight ?? 0, eM = cab.eMid ?? 0;
+  if(x <= LsL) return eL;
+  if(x >= L - LsR) return eR;
+  const xM = L/2;
+  if(x <= xM){
+    const h = xM - LsL; if(h < 1e-6) return eM;
+    const t = (x - LsL)/h;
+    return (2*t*t*t - 3*t*t + 1)*eL + (-2*t*t*t + 3*t*t)*eM;
+  } else {
+    const h = (L - LsR) - xM; if(h < 1e-6) return eM;
+    const t = (x - xM)/h;
+    return (2*t*t*t - 3*t*t + 1)*eM + (-2*t*t*t + 3*t*t)*eR;
+  }
+}
+
+function calcPrestressLosses(cfg){
+  const {Pi,L,Ap,mu=0.20,k=0.001,curvMed,deltaAnc=6,Ep=195000} = cfg;
+  const Epc = Ep * 0.1;
+  const alpha = curvMed || (8*0.20/L);
+  const dP_atr = Pi * (1 - Math.exp(-(mu*alpha + k*L)));
+  const dP_anc = (Epc * Ap * (deltaAnc/1000)) / L;
+  const P1 = Math.max(0, Pi - dP_atr - dP_anc);
+  const dP_elast = 0.04 * P1;
+  const P2 = Math.max(0, P1 - dP_elast);
+  const dP_retr = 0.07 * P2, dP_flue = 0.12 * P2, dP_relx = 0.035 * P2;
+  const bruto = dP_atr + dP_anc + dP_elast + dP_retr + dP_flue + dP_relx;
+  const total = Math.min(bruto, 0.60*Pi);
+  const Pef = Math.max(0, Pi - total);
+  return {
+    Pi, atrito:dP_atr, ancoragem:dP_anc, encurtamento:dP_elast,
+    retracao:dP_retr, fluencia:dP_flue, relaxacao:dP_relx, total, Pef,
+    pct:{atrito:100*dP_atr/Pi, ancoragem:100*dP_anc/Pi,
+      encurtamento:100*dP_elast/Pi, retracao:100*dP_retr/Pi,
+      fluencia:100*dP_flue/Pi, relaxacao:100*dP_relx/Pi, total:100*total/Pi}
+  };
+}
+
+function computeSelfWeight(model){
+  const beams = model.elements.filter(e=>e.type==='beam');
+  if(!beams.length) return 0;
+  const sec = beams[0].section;
+  return 25 * (sec.b/100) * (sec.h/100);
+}
+
+function computeFrameStiffness(){
+  const m = state.model;
+  if(!m.elements.length) return null;
+  const cols = m.elements.filter(e => e.type === 'column');
+  const beams = m.elements.filter(e => e.type === 'beam');
+  let K_lat_total = 0;
+  for(const c of cols){
+    const L = m.getSpanOf(c);
+    K_lat_total += 12 * (c.E * c.I) / (L*L*L);
+  }
+  const K_lat_andar = m.params.nFloors > 0 ? K_lat_total / m.params.nFloors : 0;
+  let K_vert = 0;
+  for(const b of beams){
+    const L = m.getSpanOf(b);
+    K_vert += 12 * (b.E * b.I) / (L*L*L);
+  }
+  const sw = computeSelfWeight(m);
+  const wTotal = state.loads.g + state.loads.q + sw;
+  const spans = m.params.spans || [m.params.span];
+  const Ltotal = spans.reduce((a,b)=>a+b,0);
+  const M_kg = wTotal * Ltotal * m.params.nFloors * 1000 / 9.81;
+  const K_lat_SI = K_lat_andar * 1000;
+  const T = K_lat_SI > 1 ? 2 * Math.PI * Math.sqrt(M_kg / K_lat_SI) : 0;
+  return {K_lat: K_lat_andar, K_lat_total, K_vert, T,
+    nNodes: m.nodes.length, nElem: m.elements.length,
+    gdl: 3 * m.nodes.length, nCols: cols.length, nBeams: beams.length};
+}
+
+function computeBalancing(){
+  const m = state.model;
+  const spans = m.params.spans || [m.params.span];
+  const L = spans.reduce((a,b)=>a+b,0) / spans.length;
+  const sec = m.elements.find(e=>e.type==='beam')?.section;
+  if(!sec) return null;
+  const sw = computeSelfWeight(m);
+  const bal = state.balancing;
+  const p = state.prestress;
+  const eAncMedio = ((p.eAncEsq ?? -5) + (p.eAncDir ?? -5)) / 2;
+  const eMidM = (p.eMid ?? 0) / 100;
+  const eSupM = (p.eSup ?? 0) / 100;
+  const eAncM = eAncMedio / 100;
+  const eSupMedio = (eSupM + eAncM) / 2;
+  const drape = eMidM - eSupMedio;
+  const cab0 = m.cables[0];
+  const Pef = cab0 ? cab0.P : 0;
+  const wBal = drape > 0 ? (8 * drape * Pef) / (L*L) : 0;
+  const g  = bal.includeG  ? state.loads.g : 0;
+  const swI= bal.includeSW ? sw : 0;
+  const qI = state.loads.q * (bal.includeQ / 100);
+  const wTarget = g + swI + qI;
+  const wDesired = wTarget * (bal.percent / 100);
+  const residual = wTarget - wBal;
+  const pctAchieved = wTarget > 1e-6 ? (wBal / wTarget) * 100 : 0;
+  const P_req = drape > 1e-4 ? (wDesired * L * L) / (8 * drape) : 0;
+  const e_req = Pef > 0.1 ? (wDesired * L * L) / (8 * Pef) : 0;
+  const Pef_per_cord = cab0 ? (cab0.P / cab0.nCordoalhas) : 0;
+  const nCord = Pef_per_cord > 0.1 ? Math.max(1, Math.ceil(P_req / Pef_per_cord)) : 0;
+  const maxE = (sec.h/2 - 4 - 1.3) / 100;
+  const drapeMax = maxE - eSupMedio;
+  return {L, sw, drape, eSupMedio, Pef, wBal, wTarget, wDesired, residual,
+          pctAchieved, P_req, e_req, nCord, Pef_per_cord, maxE, drapeMax};
+}
+
+// ==========================================================================
+// MODELO
+// ==========================================================================
+class FrameModel{
+  constructor(){this.nodes=[];this.elements=[];this.cables=[];this.params={};}
+  addNode(x,y,fix){
+    const n={id:this.nodes.length,x,y,fix:fix||[false,false,false],loads:{fx:0,fy:0,mz:0},
+             colClass:'support', isGround:false};
+    this.nodes.push(n);return n;
+  }
+  addElement(ni,nj,type,section){
+    const e={id:this.elements.length,ni,nj,type,section};
+    this.elements.push(e);return e;
+  }
+  isEndNode(nodeIdx){
+    let c=0;
+    for(const e of this.elements) if(e.type==='beam'&&(e.ni===nodeIdx||e.nj===nodeIdx)) c++;
+    return c <= 1;
+  }
+  classifyColumn(nodeIdx){
+    const nd = this.nodes[nodeIdx];
+    return nd && nd.colClass ? nd.colClass : 'support';
+  }
+  buildFrame(nFloors, spans, height, beamB, beamH, colB, colH, fck, balEsq, balDir){
+    this.nodes=[];this.elements=[];this.cables=[];
+    const cp=concProps(fck);
+    const Ec=cp.Ecs*1000;
+    balEsq = Math.max(0, balEsq || 0);
+    balDir = Math.max(0, balDir || 0);
+    const hasBalEsq = balEsq > 0.01;
+    const hasBalDir = balDir > 0.01;
+    const xMain = [0];
+    let acc = 0;
+    for(const s of spans){ acc += s; xMain.push(acc); }
+    const nMain = xMain.length;
+    const xFull = [];
+    if(hasBalEsq) xFull.push(-balEsq);
+    for(const x of xMain) xFull.push(x);
+    if(hasBalDir) xFull.push(acc + balDir);
+    const nFull = xFull.length;
+    const offset = hasBalEsq ? 1 : 0;
+    const idMap = {};
+    for(let c=0;c<nMain;c++){
+      const n = this.addNode(xMain[c], 0, [true,true,true]);
+      let cls = 'support';
+      if(c === 0) cls = 'endLeft';
+      else if(c === nMain-1) cls = 'endRight';
+      n.colClass = cls; n.isGround = true;
+      idMap[`0_${c}`] = n.id;
+    }
+    for(let r=1;r<=nFloors;r++){
+      for(let c=0;c<nFull;c++){
+        const n = this.addNode(xFull[c], r*height, [false,false,false]);
+        let cls = 'support';
+        if(hasBalEsq && c === 0) cls = 'balLeft';
+        else if(hasBalDir && c === nFull-1) cls = 'balRight';
+        else if(c === offset) cls = 'endLeft';
+        else if(c === nFull-1-offset) cls = 'endRight';
+        n.colClass = cls; n.isGround = false;
+        idMap[`${r}_${c}`] = n.id;
+      }
+    }
+    const idAt = (r, c) => {
+      if(r === 0){
+        const cMain = c - offset;
+        if(cMain < 0 || cMain >= nMain) return undefined;
+        return idMap[`0_${cMain}`];
+      }
+      if(c < 0 || c >= nFull) return undefined;
+      return idMap[`${r}_${c}`];
+    };
+    const beamSec=rectProps(beamB,beamH);
+    const colSec=rectProps(colB,colH);
+    for(let r=1;r<=nFloors;r++){
+      for(let c=0;c<nFull-1;c++){
+        const ni = idAt(r, c), nj = idAt(r, c+1);
+        if(ni === undefined || nj === undefined) continue;
+        const e = this.addElement(ni, nj, 'beam', beamSec);
+        e.E=Ec; e.A=beamSec.A*1e-4; e.I=beamSec.I*1e-8;
+      }
+    }
+    for(let r=1;r<=nFloors;r++){
+      for(let cMain=0;cMain<nMain;cMain++){
+        const cFull = cMain + offset;
+        const ni = idAt(r-1, cFull), nj = idAt(r, cFull);
+        if(ni === undefined || nj === undefined) continue;
+        const e = this.addElement(ni, nj, 'column', colSec);
+        e.E=Ec; e.A=colSec.A*1e-4; e.I=colSec.I*1e-8;
+      }
+    }
+    this.params={
+      nFloors, spans: spans.slice(), height, beamB, beamH, colB, colH, fck,
+      balEsq, balDir, xCoords: xFull, hasBalEsq, hasBalDir,
+      xMain, nMain, nFull, offset, idMap,
+      span: spans[0], nBays: spans.length
+    };
+    const p = state.prestress;
+    const eAncEsqM = (p.eAncEsq ?? -5)/100;
+    const eAncDirM = (p.eAncDir ?? -5)/100;
+    const eBalEsqM = (p.eBalEsq ?? -24)/100;
+    const eBalDirM = (p.eBalDir ?? -24)/100;
+    const eSupM    = (p.eSup ?? -20)/100;
+    const eMidM    = (p.eMid ?? 24)/100;
+    const LsAncM   = p.LsAnc ?? 0.50;
+    const excByClass = {
+      'balLeft':  { e: eBalEsqM, Ls: LsAncM },
+      'balRight': { e: eBalDirM, Ls: LsAncM },
+      'endLeft':  { e: eAncEsqM, Ls: LsAncM },
+      'endRight': { e: eAncDirM, Ls: LsAncM },
+      'support':  { e: eSupM,    Ls: 0 }
+    };
+    for(const e of this.elements){
+      if(e.type!=='beam') continue;
+      const lc = this.nodes[e.ni].colClass || 'support';
+      const rc = this.nodes[e.nj].colClass || 'support';
+      const lcfg = excByClass[lc];
+      const rcfg = excByClass[rc];
+      this.cables.push({
+        elemId: e.id,
+        eLeft: lcfg.e, eRight: rcfg.e, eMid: eMidM,
+        LsLeft: lcfg.Ls, LsRight: rcfg.Ls,
+        leftIsEnd: lc !== 'support', rightIsEnd: rc !== 'support',
+        leftNodeClass: lc, rightNodeClass: rc,
+        nCordoalhas: p.nCordoalhas ?? 6,
+        P:0, Pi:0, fpi:0, fpk:0, Ap:0
+      });
+    }
+  }
+  getSpanOf(elem){
+    const ni=this.nodes[elem.ni],nj=this.nodes[elem.nj];
+    return Math.hypot(nj.x-ni.x,nj.y-ni.y);
+  }
+}
+
+// ==========================================================================
+// SOLVER
+// ==========================================================================
+class FrameSolver{
+  constructor(model){this.model=model;}
+  elementStiffLocal(e){
+    const {E,A,I}=e;
+    const L=this.model.getSpanOf(e);
+    const EA_L=E*A/L, EI=E*I, L2=L*L, L3=L2*L;
+    return [
+      [ EA_L,0,0,-EA_L,0,0],
+      [0, 12*EI/L3, 6*EI/L2,0,-12*EI/L3, 6*EI/L2],
+      [0, 6*EI/L2, 4*EI/L,0,-6*EI/L2, 2*EI/L],
+      [-EA_L,0,0, EA_L,0,0],
+      [0,-12*EI/L3,-6*EI/L2,0, 12*EI/L3,-6*EI/L2],
+      [0, 6*EI/L2, 2*EI/L,0,-6*EI/L2, 4*EI/L]
+    ];
+  }
+  transform(e){
+    const ni=this.model.nodes[e.ni],nj=this.model.nodes[e.nj];
+    const dx=nj.x-ni.x,dy=nj.y-ni.y,L=Math.hypot(dx,dy);
+    const c=dx/L,s=dy/L;
+    return [[c,s,0,0,0,0],[-s,c,0,0,0,0],[0,0,1,0,0,0],
+            [0,0,0,c,s,0],[0,0,0,-s,c,0],[0,0,0,0,0,1]];
+  }
+  assembleK(){
+    const m=this.model,n=m.nodes.length*3,K=zeros(n,n);
+    for(const e of m.elements){
+      const kl=this.elementStiffLocal(e);
+      const T=this.transform(e);
+      const kg=matMul(matT(T),matMul(kl,T));
+      const gdof=[e.ni*3,e.ni*3+1,e.ni*3+2,e.nj*3,e.nj*3+1,e.nj*3+2];
+      for(let i=0;i<6;i++)for(let j=0;j<6;j++)K[gdof[i]][gdof[j]]+=kg[i][j];
+    }
+    return K;
+  }
+  cableEqLocal(cab, L, P){
+    const N=32, dx=L/N;
+    let Ni=P, Vi=0, Mi=P*cableY(0, cab, L);
+    let Nj=-P, Vj=0, Mj=-P*cableY(L, cab, L);
+    for(let k=0;k<N;k++){
+      const xc=(k+0.5)*dx;
+      const xa=Math.max(0,xc-dx*0.5), xb=Math.min(L,xc+dx*0.5);
+      const ea=cableY(xa,cab,L), ec=cableY(xc,cab,L), eb=cableY(xb,cab,L);
+      const ha=xc-xa, hb=xb-xc;
+      const epp=2*(ea*hb+eb*ha-ec*(ha+hb))/(ha*hb*(ha+hb));
+      const W=-P*epp*dx, xi=xc/L;
+      Vi+=W*(1-3*xi*xi+2*xi*xi*xi);
+      Mi+=W*(L*(xi-2*xi*xi+xi*xi*xi));
+      Vj+=W*(3*xi*xi-2*xi*xi*xi);
+      Mj+=W*(L*(-xi*xi+xi*xi*xi));
+    }
+    return [Ni,Vi,Mi,Nj,Vj,Mj];
+  }
+  assembleF(loadCases){
+    const m=this.model,n=m.nodes.length*3,F=new Array(n).fill(0);
+    for(const nd of m.nodes){
+      F[nd.id*3]+=nd.loads.fx;
+      F[nd.id*3+1]+=nd.loads.fy;
+      F[nd.id*3+2]+=nd.loads.mz;
+    }
+    const sw = loadCases.includeSelfWeight ? computeSelfWeight(m) : 0;
+    const wTot=(loadCases.g||0)+(loadCases.q||0)+sw;
+    for(const e of m.elements){
+      if(e.type!=='beam')continue;
+      const L=this.model.getSpanOf(e);
+      const ni=m.nodes[e.ni],nj=m.nodes[e.nj];
+      const dx=nj.x-ni.x,dy=nj.y-ni.y;
+      const c=dx/L;
+      const T=this.transform(e);
+      const qLocal=-wTot*c;
+      const FEFloc=[0, qLocal*L/2, qLocal*L*L/12, 0, qLocal*L/2, -qLocal*L*L/12];
+      const FEFg=matVec(matT(T),FEFloc);
+      const gdof=[e.ni*3,e.ni*3+1,e.ni*3+2,e.nj*3,e.nj*3+1,e.nj*3+2];
+      for(let i=0;i<6;i++)F[gdof[i]]-=FEFg[i];
+    }
+    for(const cab of m.cables){
+      const e=m.elements[cab.elemId];
+      if(!e||!cab.P)continue;
+      const L=this.model.getSpanOf(e);
+      const T=this.transform(e);
+      const eq=this.cableEqLocal(cab, L, cab.P);
+      const eqg=matVec(matT(T),eq);
+      const gdof=[e.ni*3,e.ni*3+1,e.ni*3+2,e.nj*3,e.nj*3+1,e.nj*3+2];
+      for(let i=0;i<6;i++)F[gdof[i]]+=eqg[i];
+    }
+    if(loadCases.wind){
+      const nF=m.params.nFloors;
+      const nFull=m.params.nFull;
+      const nMain=m.params.nMain;
+      for(let r=1;r<=nF;r++){
+        const rowStart = nMain + (r-1)*nFull;
+        const idx = rowStart + nFull - 1;
+        if(m.nodes[idx])F[idx*3]+=loadCases.wind/nF;
+      }
+    }
+    return F;
+  }
+  applyBC(K,F){
+    const m=this.model,n=m.nodes.length*3,fixed=new Array(n).fill(false);
+    for(const nd of m.nodes){
+      if(nd.fix[0])fixed[nd.id*3]=true;
+      if(nd.fix[1])fixed[nd.id*3+1]=true;
+      if(nd.fix[2])fixed[nd.id*3+2]=true;
+    }
+    const big=1e12;
+    for(let i=0;i<n;i++)if(fixed[i]){K[i][i]+=big;F[i]=0;}
+    return {K,F,fixed};
+  }
+  solve(loadCases){
+    const m=this.model;
+    const K0=this.assembleK();
+    const F0=this.assembleF(loadCases);
+    const {K:Km,F:Fm}=this.applyBC(K0.map(r=>r.slice()), F0.slice());
+    const U=solveLinear(Km,Fm);
+    if(!U)return {ok:false,error:'Matriz singular — verifique apoios / estabilidade.'};
+    const KU=matVec(K0,U);
+    const reactions=KU.map((v,i)=>v-F0[i]);
+    const sw = loadCases.includeSelfWeight ? computeSelfWeight(m) : 0;
+    const wTot=(loadCases.g||0)+(loadCases.q||0)+sw;
+    const forces=[];
+    const nodalForces = new Array(m.nodes.length*3).fill(0);
+    for(const e of m.elements){
+      const L=this.model.getSpanOf(e);
+      const kl=this.elementStiffLocal(e);
+      const T=this.transform(e);
+      const gdof=[e.ni*3,e.ni*3+1,e.ni*3+2,e.nj*3,e.nj*3+1,e.nj*3+2];
+      const ue=[U[gdof[0]],U[gdof[1]],U[gdof[2]],U[gdof[3]],U[gdof[4]],U[gdof[5]]];
+      const ueL=matVec(T,ue);
+      let fe=matVec(kl,ueL);
+      let FEF=[0,0,0,0,0,0];
+      if(e.type==='beam'){
+        const ni=m.nodes[e.ni],nj=m.nodes[e.nj];
+        const dx=nj.x-ni.x,dy=nj.y-ni.y;
+        const c=dx/L;
+        const qL=-wTot*c;
+        FEF=[0, qL*L/2, qL*L*L/12, 0, qL*L/2, -qL*L*L/12];
+      }
+      const cab=m.cables.find(c=>c.elemId===e.id);
+      if(cab&&cab.P){
+        const eq=this.cableEqLocal(cab, L, cab.P);
+        for(let i=0;i<6;i++)FEF[i]+=eq[i];
+      }
+      const feTot=[
+        fe[0]-FEF[0], fe[1]-FEF[1], fe[2]-FEF[2],
+        fe[3]-FEF[3], fe[4]-FEF[4], fe[5]-FEF[5]
+      ];
+      forces.push({elemId:e.id, N1:feTot[0], V1:feTot[1], M1:feTot[2],
+                   N2:-feTot[3], V2:-feTot[4], M2:-feTot[5], L});
+      const fg = matVec(matT(T), feTot);
+      nodalForces[e.ni*3+0] += fg[0];
+      nodalForces[e.ni*3+1] += fg[1];
+      nodalForces[e.ni*3+2] += fg[2];
+      nodalForces[e.nj*3+0] += fg[3];
+      nodalForces[e.nj*3+1] += fg[4];
+      nodalForces[e.nj*3+2] += fg[5];
+    }
+    return {ok:true,U,reactions,forces,wTot,sw,nodalForces};
+  }
+}
+
+function internalDiagram(elem, res, w, cab){
+  const L=res.L, N1=res.N1, V1=res.V1, M1=res.M1;
+  const pts=[],nSeg=40;
+  for(let i=0;i<=nSeg;i++){
+    const x=L*i/nSeg;
+    let Vx=V1 - w*x;
+    let Mx=M1 + V1*x - w*x*x/2;
+    if(cab&&cab.P){
+      const P=cab.P;
+      const ex=cableY(x, cab, L);
+      Mx += P*ex;
+      const h=0.01;
+      const xm=Math.max(0,x-h), xp=Math.min(L,x+h);
+      const dedx=(cableY(xp,cab,L)-cableY(xm,cab,L))/(xp-xm);
+      Vx += -P*dedx;
+    }
+    pts.push({x,V:Vx,M:Mx,N:N1});
+  }
+  return pts;
+}
+
+function sectionStress(N,M,sec){
+  const A=sec.A*1e-4, I=sec.I*1e-8, ySup=sec.h/2/100;
+  return {sigmaTop:(N/A - M*ySup/I)/1000, sigmaBot:(N/A + M*ySup/I)/1000};
+}
+
+// ==========================================================================
+// ESTADO
+// ==========================================================================
+const state={
+  model:new FrameModel(),
+  result:null,
+  view:{x:0,y:0,scale:50},
+  showDeform:true, showLoads:true, showCables:true, showReactions:true,
+  showInternalNodes:true, showDiagramValues:true, showElementIds:true,
+  defScale:50,
+  animating:false, animProgress:1, animLastTime:0, animDuration:2200, animDirection:1,
+  activeDiagram:'none',
+  currentTab:'modelo',
+  loads:{g:25, q:12, wind:0, includeSelfWeight:true},
+  prestress:{
+    P0frac:0.77, nCordoalhas:6, cordKey:'CP-190-RB-12.7',
+    eAncEsq: -5, eAncDir: -5,
+    eBalEsq: -24, eBalDir: -24,
+    eSup: -20, eMid: 24, LsAnc: 0.50
+  },
+  balancing:{ percent:100, includeG:true, includeSW:true, includeQ:0 }
+};
+
+function applyPrestressToCables(){
+  const cord = CORD_OPTIONS[state.prestress.cordKey];
+  const ApTot = (cord.area_mm2 * state.prestress.nCordoalhas) / 100;
+  const fpi = state.prestress.P0frac * cord.fpk;
+  const Pi = fpi * ApTot * 0.1;
+  state.prestress.Pi = Pi;
+  state.prestress.ApTot = ApTot;
+  state.prestress.fpi = fpi;
+  state.prestress.cord = cord;
+  for(const cab of state.model.cables){
+    cab.nCordoalhas = state.prestress.nCordoalhas;
+    cab.Ap = ApTot; cab.Pi = Pi; cab.fpi = fpi; cab.fpk = cord.fpk;
+    const L = state.model.getSpanOf(state.model.elements[cab.elemId]);
+    const curv = 8*Math.abs(cab.eMid)/L;
+    cab.perdas = calcPrestressLosses({
+      Pi, L, Ap:ApTot, fck:state.model.params.fck,
+      mu:0.20, k:0.001, curvMed:curv, deltaAnc:6, Ep:cord.Es
+    });
+    cab.P = cab.perdas.Pef;
+  }
+}
+
+state.model.buildFrame(2, [6.0, 6.0, 6.0], 3.5, 25, 60, 30, 50, 40, 0, 0);
+applyPrestressToCables();
+
+// ==========================================================================
+// CANVAS
+// ==========================================================================
+const cv=document.getElementById('cv');
+const ctx=cv.getContext('2d');
+let DPR=window.devicePixelRatio||1;
+
+function resizeCanvas(){
+  const r=cv.parentElement.getBoundingClientRect();
+  DPR=window.devicePixelRatio||1;
+  cv.width=r.width*DPR; cv.height=r.height*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  draw();
+}
+window.addEventListener('resize',resizeCanvas);
+
+function worldToScreen(x,y){
+  const v=state.view,r=cv.getBoundingClientRect();
+  return {x:(x-v.x)*v.scale + r.width/2, y:-(y-v.y)*v.scale + r.height/2};
+}
+function screenToWorld(sx,sy){
+  const v=state.view,r=cv.getBoundingClientRect();
+  return {x:(sx-r.width/2)/v.scale + v.x, y:-(sy-r.height/2)/v.scale + v.y};
+}
+
+function drawGrid(){
+  const r=cv.getBoundingClientRect(), v=state.view, w=r.width, h=r.height;
+  let step=1; const px=v.scale;
+  if(px<20)step=5; if(px<10)step=10; if(px<5)step=20;
+  if(px>150)step=0.5; if(px>300)step=0.25;
+  const tl=screenToWorld(0,0), br=screenToWorld(w,h);
+  ctx.strokeStyle='rgba(30,58,86,0.5)'; ctx.lineWidth=1; ctx.beginPath();
+  for(let x=Math.floor(tl.x/step)*step;x<=br.x;x+=step){
+    const p=worldToScreen(x,0); ctx.moveTo(p.x,0); ctx.lineTo(p.x,h);
+  }
+  for(let y=Math.floor(br.y/step)*step;y<=tl.y;y+=step){
+    const p=worldToScreen(0,y); ctx.moveTo(0,p.y); ctx.lineTo(w,p.y);
+  }
+  ctx.stroke();
+  ctx.strokeStyle='rgba(0,212,255,0.35)'; ctx.lineWidth=1.5;
+  const o=worldToScreen(0,0);
+  ctx.beginPath(); ctx.moveTo(0,o.y); ctx.lineTo(w,o.y);
+  ctx.moveTo(o.x,0); ctx.lineTo(o.x,h); ctx.stroke();
+  ctx.fillStyle='rgba(139,163,188,0.7)'; ctx.font='10px sans-serif';
+  ctx.fillText(`${step.toFixed(2)} m`,10,h-8);
+}
+
+function drawFrame(){
+  const m=state.model;
+  for(const e of m.elements){
+    const ni=m.nodes[e.ni],nj=m.nodes[e.nj];
+    const p1=worldToScreen(ni.x,ni.y), p2=worldToScreen(nj.x,nj.y);
+    ctx.lineWidth=e.type==='beam'?5:4;
+    ctx.strokeStyle=e.type==='beam'?'#00d4ff':'#8ba3bc';
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+  }
+  for(const n of m.nodes){
+    const p=worldToScreen(n.x,n.y);
+    const isFix=n.fix[0]&&n.fix[1];
+    const isBal = n.colClass==='balLeft' || n.colClass==='balRight';
+    ctx.fillStyle= isFix ? '#ff8a3d' : (isBal ? '#ef4444' : '#e2ecf5');
+    ctx.beginPath(); ctx.arc(p.x,p.y, isBal?5:4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(226,236,245,0.9)'; ctx.font='9px sans-serif';
+    ctx.fillText('N'+n.id,p.x+7,p.y-7);
+  }
+  for(const n of m.nodes){
+    if(!(n.fix[0]&&n.fix[1]))continue;
+    const p=worldToScreen(n.x,n.y);
+    ctx.fillStyle='#ff8a3d'; ctx.beginPath();
+    ctx.moveTo(p.x-8,p.y+10); ctx.lineTo(p.x+8,p.y+10); ctx.lineTo(p.x,p.y+2);
+    ctx.closePath(); ctx.fill();
+  }
+}
+
+function drawElementIds(){
+  if(!state.showElementIds) return;
+  const m = state.model;
+  const rct = cv.getBoundingClientRect();
+  for(const e of m.elements){
+    const ni=m.nodes[e.ni],nj=m.nodes[e.nj];
+    const mx = (ni.x + nj.x) / 2;
+    const my = (ni.y + nj.y) / 2;
+    const p = worldToScreen(mx, my);
+    if(p.x < -50 || p.x > rct.width + 50 || p.y < -30 || p.y > rct.height + 30) continue;
+    const isBeam = e.type === 'beam';
+    const label = 'E' + e.id;
+    const color = isBeam ? '#00d4ff' : '#8ba3bc';
+    const bg = isBeam ? 'rgba(0,90,120,0.85)' : 'rgba(40,55,75,0.85)';
+    ctx.font = 'bold 10px monospace';
+    const tw = ctx.measureText(label).width;
+    const bw = tw + 10;
+    const bh = 14;
+    const dx = nj.x - ni.x, dy = nj.y - ni.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const perpX = -dy/len, perpY = dx/len;
+    const offPx = isBeam ? -16 : 16;
+    let bx = p.x - bw/2 + perpX * offPx;
+    let by = p.y - bh/2 + (-perpY) * offPx;
+    if(bx < 2) bx = 2;
+    if(bx + bw > rct.width - 2) bx = rct.width - bw - 2;
+    if(by < 2) by = 2;
+    if(by + bh > rct.height - 2) by = rct.height - bh - 2;
+    ctx.fillStyle = bg;
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bx, by, bw, bh);
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, bx + bw/2, by + bh/2 + 0.5);
+    ctx.textAlign = 'start';
+    ctx.textBaseline = 'alphabetic';
+  }
+}
+
+function drawReactions(){
+  try{
+    if(!state.showReactions || !state.result || !state.result.ok) return;
+    const m = state.model;
+    const R  = state.result.reactions || [];
+    const NF = state.result.nodalForces || [];
+    if(R.length < m.nodes.length * 3) return;
+    const rct = cv.getBoundingClientRect();
+    for(let i=0;i<m.nodes.length;i++){
+      const nd = m.nodes[i];
+      const isFix = nd.fix[0] && nd.fix[1];
+      if(!isFix && !state.showInternalNodes) continue;
+      let Fx, Fy, Mz;
+      if(isFix){
+        Fx = Number(R[i*3+0]) || 0;
+        Fy = Number(R[i*3+1]) || 0;
+        Mz = Number(R[i*3+2]) || 0;
+      } else {
+        Fx = Number(NF[i*3+0]) || 0;
+        Fy = Number(NF[i*3+1]) || 0;
+        Mz = Number(NF[i*3+2]) || 0;
+      }
+      const mag = Math.hypot(Fx,Fy) + Math.abs(Mz)*0.1;
+      if(mag < 0.05) continue;
+      const p = worldToScreen(nd.x, nd.y);
+      const color = isFix ? '#ff8a3d' : '#3b82f6';
+      const bg    = isFix ? 'rgba(255,138,61,0.18)' : 'rgba(59,130,246,0.18)';
+      const title = isFix ? '⚖ Reação' : '🔵 Nodal';
+      const lineH = 11;
+      const lines = [`${title}  N${i}`, `Fx=${Fx.toFixed(1)} kN`, `Fy=${Fy.toFixed(1)} kN`, `Mz=${Mz.toFixed(1)} kN·m`];
+      const boxW = 92, boxH = lines.length*lineH + 8;
+      const xcs = m.params.xCoords || [0];
+      const minX = xcs[0], maxX = xcs[xcs.length-1];
+      const midX = (minX+maxX)/2;
+      const side = (nd.x >= midX) ? 1 : -1;
+      const midY = (m.params.height*m.params.nFloors)/2;
+      const vSide = (nd.y < midY) ? 1 : -1;
+      const gap = 14;
+      let by = vSide > 0 ? p.y - boxH - gap : p.y + gap;
+      let bx = side > 0 ? p.x + gap : p.x - boxW - gap;
+      if(bx < 4) bx = 4;
+      if(bx + boxW > rct.width - 4) bx = rct.width - boxW - 4;
+      if(by < 4) by = 4;
+      if(by + boxH > rct.height - 4) by = rct.height - boxH - 4;
+      ctx.fillStyle = bg; ctx.fillRect(bx, by, boxW, boxH);
+      ctx.strokeStyle = color; ctx.lineWidth = 1.2; ctx.strokeRect(bx, by, boxW, boxH);
+      ctx.beginPath(); ctx.moveTo(p.x, p.y);
+      ctx.lineTo(side > 0 ? bx : bx+boxW, p.y);
+      ctx.strokeStyle = color; ctx.setLineDash([2,3]); ctx.stroke(); ctx.setLineDash([]);
+      ctx.font = 'bold 9.5px monospace'; ctx.textAlign = 'left';
+      for(let k=0;k<lines.length;k++){
+        ctx.fillStyle = (k===0) ? '#fff' : color;
+        ctx.fillText(lines[k], bx+5, by + 10 + k*lineH);
+      }
+      ctx.textAlign = 'start';
+    }
+    ctx.fillStyle = '#ff8a3d'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'right';
+    const t = state.showInternalNodes ? '⚖ Reações + 🔵 Nodais' : '⚖ Reações nos Apoios';
+    ctx.fillText(t, rct.width-20, 20);
+    ctx.textAlign = 'start';
+  }catch(e){ console.warn('drawReactions:', e); }
+}
+
+function drawCables(){
+  if(!state.showCables)return;
+  const m=state.model;
+  for(const cab of m.cables){
+    const e=m.elements[cab.elemId];
+    if(!e)continue;
+    const ni=m.nodes[e.ni],nj=m.nodes[e.nj];
+    const L=m.getSpanOf(e);
+    const N=60, pts=[];
+    for(let i=0;i<=N;i++){
+      const t=i/N;
+      const xw=ni.x+(nj.x-ni.x)*t;
+      const yw=ni.y+(nj.y-ni.y)*t - cableY(t*L,cab,L);
+      pts.push(worldToScreen(xw,yw));
+    }
+    ctx.strokeStyle='#ff8a3d'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+    for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);
+    ctx.stroke();
+    if(cab.LsLeft > 0){
+      const t=cab.LsLeft/L;
+      const xw=ni.x+(nj.x-ni.x)*t;
+      const yw=ni.y+(nj.y-ni.y)*t - cableY(cab.LsLeft, cab, L);
+      const p=worldToScreen(xw,yw);
+      ctx.fillStyle='#e2ecf5';
+      ctx.beginPath(); ctx.arc(p.x,p.y,2.8,0,Math.PI*2); ctx.fill();
+    }
+    if(cab.LsRight > 0){
+      const t=(L-cab.LsRight)/L;
+      const xw=ni.x+(nj.x-ni.x)*t;
+      const yw=ni.y+(nj.y-ni.y)*t - cableY(L-cab.LsRight, cab, L);
+      const p=worldToScreen(xw,yw);
+      ctx.fillStyle='#e2ecf5';
+      ctx.beginPath(); ctx.arc(p.x,p.y,2.8,0,Math.PI*2); ctx.fill();
+    }
+    if(cab.leftIsEnd){
+      const isBal = (cab.leftNodeClass === 'balLeft' || cab.leftNodeClass === 'balRight');
+      ctx.fillStyle = isBal ? '#ef4444' : '#ff8a3d';
+      ctx.beginPath(); ctx.arc(pts[0].x, pts[0].y, isBal?5:4.5, 0, Math.PI*2); ctx.fill();
+      // Rótulo excentricidade
+      ctx.fillStyle = '#ff8a3d';
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText(`${(cab.eLeft*100).toFixed(0)}`, pts[0].x-18, pts[0].y-8);
+    }
+    if(cab.rightIsEnd){
+      const isBal = (cab.rightNodeClass === 'balLeft' || cab.rightNodeClass === 'balRight');
+      ctx.fillStyle = isBal ? '#ef4444' : '#ff8a3d';
+      ctx.beginPath(); ctx.arc(pts[pts.length-1].x, pts[pts.length-1].y, isBal?5:4.5, 0, Math.PI*2); ctx.fill();
+      // Rótulo excentricidade
+      ctx.fillStyle = '#ff8a3d';
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText(`${(cab.eRight*100).toFixed(0)}`, pts[pts.length-1].x+8, pts[pts.length-1].y-8);
+    }
+  }
+}
+
+function drawLoads(){
+  if(!state.showLoads)return;
+  const m=state.model;
+  const sw = state.loads.includeSelfWeight ? computeSelfWeight(m) : 0;
+  for(const e of m.elements){
+    if(e.type!=='beam')continue;
+    const w = state.loads.g + state.loads.q + sw;
+    if(w<=0)continue;
+    const ni=m.nodes[e.ni],nj=m.nodes[e.nj];
+    const p1=worldToScreen(ni.x,ni.y), p2=worldToScreen(nj.x,nj.y);
+    const dx=p2.x-p1.x, dy=p2.y-p1.y;
+    const len=Math.hypot(dx,dy);
+    if(len<20)continue;
+    const nAx=Math.max(3,Math.min(10,Math.round(len/60)));
+    const arrH=Math.min(28,Math.abs(w)*0.9+10);
+    ctx.strokeStyle='#ef4444'; ctx.fillStyle='#ef4444'; ctx.lineWidth=1.2;
+    for(let i=0;i<nAx;i++){
+      const t=(i+0.5)/nAx;
+      const x=p1.x+dx*t, y=p1.y+dy*t;
+      const yTop=y-arrH-14;
+      ctx.beginPath(); ctx.moveTo(x,yTop); ctx.lineTo(x,y-arrH); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x,y-arrH); ctx.lineTo(x-3.5,y-arrH-5); ctx.lineTo(x+3.5,y-arrH-5);
+      ctx.closePath(); ctx.fill();
+    }
+    if(len>60){
+      ctx.fillStyle='#ef4444'; ctx.font='bold 10px sans-serif';
+      const mx=(p1.x+p2.x)/2, my=(p1.y+p2.y)/2-arrH-20;
+      ctx.fillText(`${w.toFixed(2)} kN/m`,mx-30,my);
+    }
+  }
+}
+
+function drawBalancing(){
+  try{
+    if(state.currentTab !== 'balance') return;
+    if(!state.result || !state.result.ok) return;
+    const bal = computeBalancing();
+    if(!bal) return;
+    const m = state.model;
+    for(const e of m.elements){
+      if(e.type !== 'beam') continue;
+      const ni=m.nodes[e.ni],nj=m.nodes[e.nj];
+      const p1=worldToScreen(ni.x,ni.y), p2=worldToScreen(nj.x,nj.y);
+      const dx=p2.x-p1.x, dy=p2.y-p1.y;
+      const len=Math.hypot(dx,dy);
+      if(len<30) continue;
+      const nAx = Math.max(4, Math.min(12, Math.round(len/50)));
+      const arrH_down = Math.min(22, bal.wTarget*0.55+8);
+      ctx.strokeStyle='#ef4444'; ctx.fillStyle='#ef4444'; ctx.lineWidth=1.5;
+      for(let i=0;i<nAx;i++){
+        const t=(i+0.5)/nAx;
+        const x=p1.x+dx*t, y=p1.y+dy*t;
+        ctx.beginPath(); ctx.moveTo(x, y-arrH_down-45); ctx.lineTo(x, y-45); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y-40); ctx.lineTo(x-3.5, y-45); ctx.lineTo(x+3.5, y-45);
+        ctx.closePath(); ctx.fill();
+      }
+      const arrH_up = Math.min(22, bal.wBal*0.55+8);
+      ctx.strokeStyle='#22c55e'; ctx.fillStyle='#22c55e'; ctx.lineWidth=1.5;
+      for(let i=0;i<nAx;i++){
+        const t=(i+0.5)/nAx;
+        const x=p1.x+dx*t, y=p1.y+dy*t;
+        ctx.beginPath(); ctx.moveTo(x, y+arrH_up+45); ctx.lineTo(x, y+45); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y+40); ctx.lineTo(x-3.5, y+45); ctx.lineTo(x+3.5, y+45);
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.font='bold 11px sans-serif';
+      ctx.fillStyle='#ef4444'; ctx.textAlign='left';
+      ctx.fillText(`↓ w_alvo = ${bal.wTarget.toFixed(2)}`, p1.x+15, p1.y-arrH_down-55);
+      ctx.fillStyle='#22c55e';
+      ctx.fillText(`↑ w_bal = ${bal.wBal.toFixed(2)} (${bal.pctAchieved.toFixed(0)}%)`, p1.x+15, p1.y+arrH_up+62);
+      ctx.textAlign='start';
+    }
+  }catch(e){ console.warn('drawBalancing:', e); }
+}
+
+function drawDeformed(){
+  if(!state.showDeform||!state.result||!state.result.ok)return;
+  const m=state.model, U=state.result.U;
+  const scale = state.defScale * state.animProgress;
+  if(scale < 0.01) return;
+  ctx.strokeStyle='#22c55e'; ctx.lineWidth=2.5; ctx.setLineDash([5,4]);
+  for(const e of m.elements){
+    const ni=m.nodes[e.ni],nj=m.nodes[e.nj];
+    const u1x=U[e.ni*3],u1y=U[e.ni*3+1];
+    const u2x=U[e.nj*3],u2y=U[e.nj*3+1];
+    const p1=worldToScreen(ni.x+u1x*scale,ni.y+u1y*scale);
+    const p2=worldToScreen(nj.x+u2x*scale,nj.y+u2y*scale);
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+}
+
+function drawValueLabel(x, y, val, color, pos, destaque){
+  pos = pos || 'top'; destaque = destaque || false;
+  const txt = (Math.abs(val)<10?val.toFixed(2):val.toFixed(1));
+  const pad = 4;
+  ctx.font = destaque ? 'bold 10.5px monospace' : 'bold 10px monospace';
+  const tw = ctx.measureText(txt).width;
+  const bw = tw + pad*2; const bh = 14;
+  let bx = x - bw/2;
+  let by = (pos==='top') ? y - bh - 4 : y + 4;
+  const rct = cv.getBoundingClientRect();
+  if(bx < 2) bx = 2;
+  if(bx + bw > rct.width - 2) bx = rct.width - bw - 2;
+  if(by < 2) by = 2;
+  if(by + bh > rct.height - 2) by = rct.height - bh - 2;
+  ctx.fillStyle = destaque ? color : 'rgba(6,16,26,0.88)';
+  ctx.fillRect(bx, by, bw, bh);
+  ctx.strokeStyle = color; ctx.lineWidth = destaque ? 1.3 : 0.8;
+  ctx.strokeRect(bx, by, bw, bh);
+  ctx.fillStyle = destaque ? '#001a26' : color;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(txt, bx + bw/2, by + bh/2);
+  ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+}
+
+function drawDiagram(){
+  try{
+    if(state.activeDiagram==='none'||!state.result||!state.result.ok)return;
+    const m=state.model, w=state.result.wTot;
+    const diagColor={M:'#00d4ff',V:'#ff8a3d',N:'#a855f7'}[state.activeDiagram];
+    const diagLbl={M:'M',V:'V',N:'N'}[state.activeDiagram];
+    const diagUnit={M:'kN·m',V:'kN',N:'kN'}[state.activeDiagram];
+    let maxAbs=0;
+    const elemData=[];
+    for(const e of m.elements){
+      const r=state.result.forces.find(f=>f.elemId===e.id);
+      if(!r)continue;
+      const cab=m.cables.find(c=>c.elemId===e.id);
+      const pts=internalDiagram(e,r,w,cab);
+      let eMax={v:-1e9,x:0}, eMin={v:1e9,x:0};
+      for(const p of pts){
+        const v=state.activeDiagram==='M'?p.M:state.activeDiagram==='V'?p.V:p.N;
+        if(v>eMax.v) eMax={v,x:p.x};
+        if(v<eMin.v) eMin={v,x:p.x};
+        if(Math.abs(v)>maxAbs) maxAbs=Math.abs(v);
+      }
+      elemData.push({
+        e,pts,eMax,eMin,
+        vLeft: state.activeDiagram==='M'?pts[0].M:state.activeDiagram==='V'?pts[0].V:pts[0].N,
+        vRight: state.activeDiagram==='M'?pts[pts.length-1].M:state.activeDiagram==='V'?pts[pts.length-1].V:pts[pts.length-1].N
+      });
+    }
+    if(maxAbs===0)maxAbs=1;
+    const maxPx=Math.min(90, cv.getBoundingClientRect().height*0.15);
+    for(const {e,pts,eMax,eMin,vLeft,vRight} of elemData){
+      const ni=m.nodes[e.ni],nj=m.nodes[e.nj];
+      const dx=nj.x-ni.x,dy=nj.y-ni.y;
+      const L=Math.hypot(dx,dy);
+      const ux=dx/L,uy=dy/L;
+      const nx=-uy,ny=ux;
+      const sgn=state.activeDiagram==='M'?-1:1;
+      const screenPts=pts.map(p=>{
+        const xw=ni.x+ux*p.x, yw=ni.y+uy*p.x;
+        const val=state.activeDiagram==='M'?p.M:state.activeDiagram==='V'?p.V:p.N;
+        const off=val/maxAbs*maxPx/state.view.scale;
+        return {pt:worldToScreen(xw+nx*off*sgn, yw+ny*off*sgn), val, x:p.x};
+      });
+      const base1=worldToScreen(ni.x,ni.y), base2=worldToScreen(nj.x,nj.y);
+      ctx.beginPath(); ctx.moveTo(base1.x,base1.y);
+      for(const p of screenPts)ctx.lineTo(p.pt.x,p.pt.y);
+      ctx.lineTo(base2.x,base2.y); ctx.closePath();
+      ctx.fillStyle=diagColor+'22'; ctx.fill();
+      ctx.strokeStyle=diagColor; ctx.lineWidth=1.8;
+      ctx.beginPath(); ctx.moveTo(base1.x,base1.y);
+      for(const p of screenPts)ctx.lineTo(p.pt.x,p.pt.y);
+      ctx.lineTo(base2.x,base2.y); ctx.stroke();
+      if(state.showDiagramValues){
+        const pL=screenPts[0], pR=screenPts[screenPts.length-1];
+        drawValueLabel(pL.pt.x, pL.pt.y, vLeft, diagColor, 'top', false);
+        drawValueLabel(pR.pt.x, pR.pt.y, vRight, diagColor, 'bottom', false);
+        if(Math.abs(eMax.x) > 0.1 && Math.abs(eMax.x - L) > 0.1){
+          const pMaxS = screenPts.reduce((b,p)=>Math.abs(p.x-eMax.x)<Math.abs(b.x-eMax.x)?p:b, screenPts[0]);
+          drawValueLabel(pMaxS.pt.x, pMaxS.pt.y, eMax.v, '#fbbf24', 'top', true);
+        }
+        if(Math.abs(eMin.v - eMax.v) > 0.5 && Math.abs(eMin.x) > 0.1 && Math.abs(eMin.x - L) > 0.1){
+          const pMinS = screenPts.reduce((b,p)=>Math.abs(p.x-eMin.x)<Math.abs(b.x-eMin.x)?p:b, screenPts[0]);
+          drawValueLabel(pMinS.pt.x, pMinS.pt.y, eMin.v, '#ef4444', 'bottom', true);
+        }
+      }
+    }
+    const rct = cv.getBoundingClientRect();
+    ctx.font = 'bold 13px sans-serif';
+    const txt = `📊 Diagrama ${diagLbl} ativo — máx = ${maxAbs.toFixed(1)} ${diagUnit}`;
+    const tw = ctx.measureText(txt).width;
+    const bx = rct.width/2 - tw/2 - 12, by = 8;
+    const bw = tw + 24, bh = 26;
+    ctx.fillStyle = 'rgba(10,20,32,0.94)';
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.strokeStyle = diagColor; ctx.lineWidth = 1.5; ctx.strokeRect(bx, by, bw, bh);
+    ctx.fillStyle = diagColor;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(txt, rct.width/2, by + bh/2);
+    ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+    if(state.showDiagramValues){
+      ctx.font='bold 9.5px sans-serif';
+      ctx.fillStyle='#fbbf24'; ctx.fillText('◆ máximo', 20, 52);
+      ctx.fillStyle='#ef4444'; ctx.fillText('◆ mínimo', 90, 52);
+    }
+  }catch(e){ console.warn('drawDiagram:', e); }
+}
+
+function updateDiagramToolbarHighlight(){
+  const btn = document.getElementById('btnDiagValues');
+  if(!btn) return;
+  if(state.activeDiagram !== 'none'){
+    btn.innerHTML = `🔢 Valores · <b style="color:#fbbf24">${state.activeDiagram}</b>`;
+  } else {
+    btn.textContent = '🔢 Valores';
+  }
+}
+
+function drawAnimOverlay(){
+  if(!state.animating && state.animProgress === 0) return;
+  const rct = cv.getBoundingClientRect();
+  const w = 200, h = 8;
+  const bx = rct.width - w - 20;
+  const by = 48;
+  const cx = bx + w/2;
+  ctx.fillStyle = 'rgba(10,20,32,0.9)';
+  ctx.fillRect(bx - 10, by - 24, w + 20, h + 32);
+  ctx.strokeStyle = '#00d4ff'; ctx.lineWidth = 1;
+  ctx.strokeRect(bx - 10, by - 24, w + 20, h + 32);
+  ctx.fillStyle = 'rgba(0,212,255,0.15)';
+  ctx.fillRect(bx, by, w, h);
+  ctx.fillStyle = state.animDirection >= 0 ? '#00d4ff' : '#ff8a3d';
+  ctx.fillRect(bx, by, w * state.animProgress, h);
+  ctx.fillStyle = '#e2ecf5';
+  ctx.font = 'bold 10px sans-serif';
+  ctx.textAlign = 'center';
+  const label = state.animating
+    ? (state.animDirection >= 0 ? '▶ Simulando (ida)' : '◀ Retornando')
+    : `⏸ Pausado em ${(state.animProgress*100).toFixed(0)}%`;
+  ctx.fillText(label, cx, by - 10);
+  if(state.animProgress > 0.08){
+    ctx.font = 'bold 9px monospace';
+    ctx.fillStyle = '#001a26';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${(state.animProgress*100).toFixed(0)}%`, bx + w*state.animProgress/2, by + h/2);
+    ctx.textBaseline = 'alphabetic';
+  }
+  ctx.textAlign = 'start';
+}
+
+function draw(){
+  const r=cv.getBoundingClientRect();
+  ctx.fillStyle='#06101a'; ctx.fillRect(0,0,r.width,r.height);
+  drawGrid(); drawFrame(); drawCables();
+  if(state.currentTab === 'balance'){ drawBalancing(); }
+  else { drawLoads(); }
+  drawElementIds();
+  drawDiagram(); drawDeformed(); drawReactions();
+  drawAnimOverlay();
+  updateDiagramToolbarHighlight();
+}
+
+let dragging=false,lastX=0,lastY=0;
+cv.addEventListener('mousedown',e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;});
+window.addEventListener('mousemove',e=>{
+  if(!dragging)return;
+  state.view.x-=(e.clientX-lastX)/state.view.scale;
+  state.view.y+=(e.clientY-lastY)/state.view.scale;
+  lastX=e.clientX;lastY=e.clientY; draw();
+});
+window.addEventListener('mouseup',()=>dragging=false);
+cv.addEventListener('touchstart',e=>{
+  if(e.touches.length===1){dragging=true;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;}
+},{passive:true});
+cv.addEventListener('touchmove',e=>{
+  if(!dragging||e.touches.length!==1)return;
+  state.view.x-=(e.touches[0].clientX-lastX)/state.view.scale;
+  state.view.y-=(e.touches[0].clientY-lastY)/state.view.scale;
+  lastX=e.touches[0].clientX;lastY=e.touches[0].clientY; draw();
+},{passive:true});
+cv.addEventListener('touchend',()=>dragging=false);
+cv.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const f=e.deltaY<0?1.1:1/1.1;
+  const r=cv.getBoundingClientRect();
+  const mx=e.clientX-r.left,my=e.clientY-r.top;
+  const w=screenToWorld(mx,my);
+  state.view.scale*=f;
+  const w2=screenToWorld(mx,my);
+  state.view.x+=w.x-w2.x; state.view.y+=w.y-w2.y;
+  updateZoomInfo(); draw();
+},{passive:false});
+function updateZoomInfo(){
+  const el=document.getElementById('zoomInfo');
+  if(el)el.textContent=Math.round(state.view.scale/50*100)+'%';
+}
+
+// ==========================================================================
+// ANIMAÇÃO
+// ==========================================================================
+let animRAF = null;
+function startAnimation(){
+  if(state.animating) return;
+  if(!state.result || !state.result.ok){ toast('Execute a análise primeiro','warn'); return; }
+  state.animating = true;
+  if(state.animProgress >= 1){ state.animProgress = 0; state.animDirection = 1; }
+  state.animLastTime = 0;
+  const btn = document.getElementById('btnPlay');
+  if(btn){ btn.classList.add('active'); btn.textContent = '⏸ Pausar'; }
+  animRAF = requestAnimationFrame(tickAnimation);
+}
+function tickAnimation(timestamp){
+  if(!state.animating){ animRAF = null; return; }
+  if(!state.animLastTime) state.animLastTime = timestamp;
+  const dt = timestamp - state.animLastTime;
+  state.animLastTime = timestamp;
+  const speed = 1 / state.animDuration;
+  state.animProgress += state.animDirection * speed * dt;
+  if(state.animProgress >= 1){ state.animProgress = 1; state.animDirection = -1; }
+  else if(state.animProgress <= 0){ state.animProgress = 0; state.animDirection = 1; }
+  draw();
+  animRAF = requestAnimationFrame(tickAnimation);
+}
+function pauseAnimation(){
+  if(!state.animating) return;
+  state.animating = false;
+  if(animRAF) cancelAnimationFrame(animRAF);
+  animRAF = null;
+  state.animLastTime = 0;
+  const btn = document.getElementById('btnPlay');
+  if(btn){ btn.classList.remove('active'); btn.textContent = '▶ Retomar'; }
+  draw();
+}
+function resetAnimation(){
+  if(animRAF) cancelAnimationFrame(animRAF);
+  animRAF = null;
+  state.animating = false;
+  state.animProgress = 0;
+  state.animDirection = 1;
+  state.animLastTime = 0;
+  const btn = document.getElementById('btnPlay');
+  if(btn){ btn.classList.remove('active'); btn.textContent = '▶ Simular'; }
+  draw();
+}
+
+// ==========================================================================
+// SIDEBAR
+// ==========================================================================
+function renderSidebar(){
+  try{
+    const el=document.getElementById('sidebarContent');
+    const tab=state.currentTab;
+    let html='';
+    const p = state.model.params;
+
+    if(tab==='modelo'){
+      const sw = computeSelfWeight(state.model);
+      const rig = computeFrameStiffness();
+      const spans = p.spans || [p.span || 6];
+      const spansStr = spans.map(s=>s.toFixed(2)).join(', ');
+      html=`
+      <div class="panel-sec">
+        <div class="panel-head">📐 Geometria do Pórtico</div>
+        <div class="panel-body">
+          <div class="row2">
+            <div class="field"><label>Pavimentos</label><input type="number" id="inNFloor" value="${p.nFloors||2}" min="1" max="10"></div>
+            <div class="field"><label>Altura (m)</label><input type="number" id="inHeight" value="${p.height||3.5}" step="0.1" min="2"></div>
+          </div>
+          <div class="field"><label>Comprimentos dos vãos (m) — vírgula</label>
+            <input type="text" id="inSpans" value="${spansStr}">
+            <div class="hint">Ex.: <b>6.0, 5.0, 6.5</b> · Para 1 vão só: <b>6</b></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>Balanço esq (m)</label>
+              <input type="number" id="inBalEsq" value="${p.balEsq||0}" step="0.1" min="0" max="6">
+            </div>
+            <div class="field"><label>Balanço dir (m)</label>
+              <input type="number" id="inBalDir" value="${p.balDir||0}" step="0.1" min="0" max="6">
+            </div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>Viga b (cm)</label><input type="number" id="inBB" value="${p.beamB||25}" min="10" max="80"></div>
+            <div class="field"><label>Viga h (cm)</label><input type="number" id="inBH" value="${p.beamH||60}" min="20" max="200"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>Pilar b (cm)</label><input type="number" id="inCB" value="${p.colB||30}" min="15" max="120"></div>
+            <div class="field"><label>Pilar h (cm)</label><input type="number" id="inCH" value="${p.colH||50}" min="15" max="120"></div>
+          </div>
+          <div class="field"><label>Concreto (fck MPa)</label>
+            <select id="inFck">${CONCRETE.map(c=>`<option ${c===(p.fck||40)?'selected':''}>${c}</option>`).join('')}</select>
+          </div>
+          <button class="btn primary" id="btnRebuild">↻ Reconstruir Pórtico</button>
+        </div>
+      </div>
+      ${rig ? `
+      <div class="panel-sec">
+        <div class="panel-head">💪 Rigidez Global</div>
+        <div class="panel-body">
+          <div class="stat"><span>K lateral / andar</span><span>${rig.K_lat.toFixed(0)} kN/m</span></div>
+          <div class="stat"><span>K lateral total</span><span>${rig.K_lat_total.toFixed(0)} kN/m</span></div>
+          <div class="stat"><span>K vertical (vigas)</span><span>${rig.K_vert.toFixed(0)} kN/m</span></div>
+          <div class="stat"><span>Período T</span><span>${rig.T.toFixed(3)} s</span></div>
+          <div class="stat"><span>Nós / Elementos</span><span>${rig.nNodes} / ${rig.nElem}</span></div>
+          <div class="stat"><span>GDL</span><span>${rig.gdl}</span></div>
+        </div>
+      </div>`:''}
+      <div class="panel-sec">
+        <div class="panel-head">⚖ Carregamentos</div>
+        <div class="panel-body">
+          <div class="field"><label>Carga permanente g (kN/m)</label>
+            <input type="number" id="inLoadG" value="${state.loads.g}" step="1" min="0">
+          </div>
+          <div class="field"><label>Carga variável q (kN/m)</label>
+            <input type="number" id="inLoadQ" value="${state.loads.q}" step="1" min="0">
+          </div>
+          <div class="chk-row"><input type="checkbox" id="chkSelfWeight" ${state.loads.includeSelfWeight?'checked':''}>
+            <label for="chkSelfWeight" style="margin:0;cursor:pointer">Peso próprio (γ=25 kN/m³)</label></div>
+          <div class="info-box"><b>Peso próprio:</b> ${(p.beamB||25)}×${(p.beamH||60)} cm → <b>${sw.toFixed(3)} kN/m</b></div>
+          <div class="field"><label>Vento (kN/andar)</label>
+            <input type="number" id="inLoadWind" value="${state.loads.wind}" step="1" min="0">
+          </div>
+          <button class="btn" id="btnApplyLoads">✓ Aplicar cargas</button>
+        </div>
+      </div>
+      <div class="panel-sec">
+        <div class="panel-head">👁 Visualização</div>
+        <div class="panel-body">
+          <div class="chk-row"><input type="checkbox" id="chkShowReactions" ${state.showReactions?'checked':''}>
+            <label for="chkShowReactions" style="margin:0;cursor:pointer">Reações de apoio</label></div>
+          <div class="chk-row"><input type="checkbox" id="chkShowInternal" ${state.showInternalNodes?'checked':''}>
+            <label for="chkShowInternal" style="margin:0;cursor:pointer">Resultantes nodais</label></div>
+          <div class="chk-row"><input type="checkbox" id="chkShowIds" ${state.showElementIds?'checked':''}>
+            <label for="chkShowIds" style="margin:0;cursor:pointer">IDs das barras (E0, E1, …)</label></div>
+          <div class="chk-row"><input type="checkbox" id="chkShowDiagValues" ${state.showDiagramValues?'checked':''}>
+            <label for="chkShowDiagValues" style="margin:0;cursor:pointer">Valores nos diagramas</label></div>
+        </div>
+      </div>
+      <div class="panel-sec">
+        <div class="panel-head">🎬 Animação (loop)</div>
+        <div class="panel-body">
+          <div class="btn-grid">
+            <button class="btn success" id="btnAnim2">▶ Simular</button>
+            <button class="btn" id="btnResetAnim2">↻ Resetar</button>
+          </div>
+          <div class="field"><label>Duração de cada trecho (s)</label>
+            <input type="number" id="inAnimDur2" value="${(state.animDuration/1000).toFixed(1)}" step="0.2" min="0.3" max="10">
+          </div>
+          <div class="info-box">
+            <b>Loop contínuo:</b> ida → volta → ida…<br>
+            <b>Escala final:</b> ${state.defScale}× a deformada real
+          </div>
+        </div>
+      </div>
+      <div class="panel-sec">
+        <div class="panel-head">💾 Projeto</div>
+        <div class="panel-body">
+          <div class="btn-grid">
+            <button class="btn" id="btnSave">💾 Salvar</button>
+            <button class="btn" id="btnLoad">📂 Abrir</button>
+            <button class="btn" id="btnJson">⬇ JSON</button>
+            <button class="btn" id="btnCsv">⬇ CSV</button>
+          </div>
+          <button class="btn" id="btnPrint">📄 Memória de Cálculo</button>
+        </div>
+      </div>`;
+    } else if(tab==='protensao'){
+      const pp = state.prestress;
+      const cord = CORD_OPTIONS[pp.cordKey];
+      const hasBalEsq = state.model.params.hasBalEsq;
+      const hasBalDir = state.model.params.hasBalDir;
+      const h_max = ((p.beamH||60)/2 - 4 - 1.3).toFixed(1);
+      html=`
+      <div class="panel-sec">
+        <div class="panel-head">🔧 Configuração da Protensão</div>
+        <div class="panel-body">
+          <div class="field"><label>Tipo de cordoalha</label>
+            <select id="inCordKey">${Object.entries(CORD_OPTIONS).map(([k,v])=>
+              `<option value="${k}" ${k===pp.cordKey?'selected':''}>${v.nome}</option>`).join('')}</select>
+          </div>
+          <div class="row2">
+            <div class="field"><label>Ø (mm)</label><input id="inCableDiam" value="${cord.diam_mm}" readonly style="opacity:.7"></div>
+            <div class="field"><label>Área (mm²)</label><input id="inCableArea" value="${cord.area_mm2}" readonly style="opacity:.7"></div>
+          </div>
+          <div class="field"><label>Cordoalhas por cabo</label>
+            <input type="number" id="inNCord" value="${pp.nCordoalhas}" min="1" max="19">
+          </div>
+          <div class="field"><label>Fração fpk inicial (0.5–0.85)</label>
+            <input type="number" id="inFpi" value="${pp.P0frac}" step="0.01" min="0.5" max="0.85">
+          </div>
+          <div class="info-box">Ap total = <b>${(cord.area_mm2*pp.nCordoalhas/100).toFixed(2)} cm²</b></div>
+          <button class="btn primary" id="btnApplyCP">🔧 Aplicar Protensão</button>
+        </div>
+      </div>
+      <div class="panel-sec">
+        <div class="panel-head">⚓ Ancoragem nos Extremos <span class="tag anc">INDEPENDENTE</span></div>
+        <div class="panel-body">
+          <div class="info-box">
+            Negativo = acima do CG · Positivo = abaixo<br>
+            Máx. admissível: <b>${h_max} cm</b>
+          </div>
+          <div class="row2">
+            <div class="field"><label>eAnc ESQ (cm)</label>
+              <input type="number" id="inEAncEsq" value="${pp.eAncEsq}" step="1">
+            </div>
+            <div class="field"><label>eAnc DIR (cm)</label>
+              <input type="number" id="inEAncDir" value="${pp.eAncDir}" step="1">
+            </div>
+          </div>
+          <button class="btn accent2" id="btnApplyAnc">⚓ Aplicar Ancoragens Esq/Dir</button>
+        </div>
+      </div>
+      ${(hasBalEsq || hasBalDir) ? `
+      <div class="panel-sec">
+        <div class="panel-head">🏗 Balanços <span class="tag bal">MAIS EXCÊNTRICA</span></div>
+        <div class="panel-body">
+          <div class="info-box">Viga em balanço → ancoragem mais excêntrica (junto ao topo) para combater M⁻.</div>
+          ${hasBalEsq ? `<div class="field"><label>eBal ESQ (cm)</label>
+            <input type="number" id="inEBalEsq" value="${pp.eBalEsq}" step="1"></div>`:''}
+          ${hasBalDir ? `<div class="field"><label>eBal DIR (cm)</label>
+            <input type="number" id="inEBalDir" value="${pp.eBalDir}" step="1"></div>`:''}
+          <button class="btn accent2" id="btnApplyBal">🏗 Aplicar Ancoragens dos Balanços</button>
+        </div>
+      </div>`:''}
+      <div class="panel-sec">
+        <div class="panel-head">📏 Comprimento Reto</div>
+        <div class="panel-body">
+          <div class="field"><label>LsAnc (m)</label>
+            <input type="number" id="inLsAnc" value="${pp.LsAnc}" step="0.05" min="0" max="2">
+          </div>
+          <button class="btn" id="btnApplyLs">📏 Aplicar LsAnc</button>
+        </div>
+      </div>
+      <div class="panel-sec">
+        <div class="panel-head">🔺 Apoio Contínuo <span class="tag sup">INTERNOS</span></div>
+        <div class="panel-body">
+          <div class="field"><label>eSup (cm)</label><input type="number" id="inESup" value="${pp.eSup}" step="1"></div>
+          <button class="btn accent2" id="btnApplySup">🔺 Aplicar</button>
+        </div>
+      </div>
+      <div class="panel-sec">
+        <div class="panel-head">〰 Meio do Vão</div>
+        <div class="panel-body">
+          <div class="field"><label>eMid (cm)</label><input type="number" id="inEMid" value="${pp.eMid}" step="1"></div>
+          <button class="btn accent2" id="btnApplyMid">〰 Aplicar</button>
+        </div>
+      </div>
+      <div class="panel-sec">
+        <div class="panel-head">📉 Perdas de Protensão</div>
+        <div class="panel-body" id="lossesBox"></div>
+      </div>`;
+    } else if(tab==='analise'){
+      html=`
+      <div class="panel-sec">
+        <div class="panel-head">▶ Análise Estrutural</div>
+        <div class="panel-body">
+          <button class="btn primary" id="btnSolve">▶ CALCULAR ESTRUTURA</button>
+        </div>
+      </div>
+      <div class="panel-sec">
+        <div class="panel-head">🎬 Simulação</div>
+        <div class="panel-body">
+          <div class="btn-grid">
+            <button class="btn success" id="btnAnim">▶ Simular</button>
+            <button class="btn" id="btnResetAnim2b">↻ Resetar</button>
+          </div>
+          <div class="field"><label>Duração de cada trecho (s)</label>
+            <input type="number" id="inAnimDur" value="${(state.animDuration/1000).toFixed(1)}" step="0.2" min="0.3" max="10">
+          </div>
+        </div>
+      </div>
+      <div class="panel-sec">
+        <div class="panel-head">📊 Deformada</div>
+        <div class="panel-body">
+          <div class="field"><label>Escala da deformada (×)</label>
+            <select id="inDefScale">
+              <option value="1">1×</option><option value="10">10×</option>
+              <option value="50" selected>50×</option><option value="100">100×</option>
+              <option value="500">500×</option>
+            </select>
+          </div>
+        </div>
+      </div>`;
+    } else if(tab==='balance'){
+      const bal = computeBalancing();
+      if(!bal){el.innerHTML='<div class="err-box">Sem vigas no modelo.</div>'; return;}
+      const pctClass = bal.pctAchieved>=95?'green':(bal.pctAchieved>=70?'orange':'red');
+      const resTxt = bal.residual > 0.1
+        ? `<span style="color:#f59e0b">Resíduo ↓ ${bal.residual.toFixed(2)} kN/m</span>`
+        : (bal.residual < -0.1
+          ? `<span style="color:#22c55e">Sobrecarga ↑ ${(-bal.residual).toFixed(2)} kN/m</span>`
+          : `<span style="color:#22c55e">Balanceamento perfeito ✓</span>`);
+      html=`
+      <div class="panel-sec">
+        <div class="panel-head">📐 Fórmula Fundamental</div>
+        <div class="panel-body">
+          <div class="formula"><span class="var">w</span><sub>bal</sub> = 8 · <span class="var">e</span> · <span class="var">P</span> / <span class="var">L</span>²</div>
+          <div class="info-box">Vão médio: <b>L = ${bal.L.toFixed(2)} m</b></div>
+        </div>
+      </div>
+      <div class="panel-sec">
+        <div class="panel-head">🎯 Objetivo</div>
+        <div class="panel-body">
+          <div class="field"><label>Percentual a balancear (%)</label>
+            <input type="number" id="inBalPct" value="${state.balancing.percent}" min="0" max="150" step="5">
+          </div>
+          <div class="chk-row"><input type="checkbox" id="chkBalG" ${state.balancing.includeG?'checked':''}>
+            <label for="chkBalG" style="margin:0;cursor:pointer">Permanente g</label></div>
+          <div class="chk-row"><input type="checkbox" id="chkBalSW" ${state.balancing.includeSW?'checked':''}>
+            <label for="chkBalSW" style="margin:0;cursor:pointer">Peso próprio</label></div>
+          <div class="field"><label>Fração q incluída (%)</label>
+            <input type="number" id="inBalQ" value="${state.balancing.includeQ}" min="0" max="100" step="10">
+          </div>
+          <div class="success-box"><b>w_alvo:</b> ${bal.wTarget.toFixed(2)} · <b>w_desc:</b> ${bal.wDesired.toFixed(2)} kN/m</div>
+          <button class="btn primary" id="btnBalApply">✓ Aplicar parâmetros</button>
+        </div>
+      </div>
+      <div class="panel-sec">
+        <div class="panel-head">📊 Estado Atual</div>
+        <div class="panel-body">
+          <div class="stat"><span>Drape e</span><span>${(bal.drape*100).toFixed(1)} cm</span></div>
+          <div class="stat"><span>Pef</span><span>${bal.Pef.toFixed(0)} kN</span></div>
+          <div class="stat"><span>w_bal</span><span>${bal.wBal.toFixed(2)} kN/m</span></div>
+          <div class="stat"><span><b>% balanceado</b></span><span><b>${bal.pctAchieved.toFixed(1)}%</b></span></div>
+          <div class="balance-bar">
+            <div class="fill" style="width:${Math.min(100,bal.pctAchieved)}%"></div>
+            <div class="target" style="left:${Math.min(100,state.balancing.percent)}%"></div>
+            <div class="pct-label">${bal.pctAchieved.toFixed(0)}%</div>
+          </div>
+          <div class="stat-big ${pctClass}">
+            <div class="label">Resíduo</div>
+            <div class="val">${bal.residual.toFixed(2)}<span class="unit">kN/m</span></div>
+          </div>
+          <div class="info-box">${resTxt}</div>
+        </div>
+      </div>
+      <div class="panel-sec">
+        <div class="panel-head">🛠️ Dimensionamento Auxiliar</div>
+        <div class="panel-body">
+          <div class="stat"><span>P necessário</span><span>${bal.P_req.toFixed(0)} kN</span></div>
+          <div class="stat"><span>Cordoalhas</span><span>${bal.nCord} (atual: ${state.prestress.nCordoalhas})</span></div>
+          <div class="stat"><span>e necessário</span><span>${(bal.e_req*100).toFixed(1)} cm</span></div>
+          <button class="btn success" id="btnBalP">📈 Aplicar P (${bal.nCord} cordoalhas)</button>
+          <button class="btn success" id="btnBalE">📐 Aplicar eMid</button>
+        </div>
+      </div>`;
+    } else if(tab==='diagramas'){
+      const r=state.result;
+      let tabela='';
+      if(r && r.ok && state.activeDiagram !== 'none'){
+        const w = r.wTot;
+        const rows=[];
+        for(const e of state.model.elements){
+          const fr = r.forces.find(f=>f.elemId===e.id);
+          if(!fr) continue;
+          const cab = state.model.cables.find(c=>c.elemId===e.id);
+          const pts = internalDiagram(e, fr, w, cab);
+          let vMax=-1e9, xMax=0, vMin=1e9, xMin=0;
+          for(const p of pts){
+            const val = state.activeDiagram==='M'?p.M : state.activeDiagram==='V'?p.V : p.N;
+            if(val>vMax){vMax=val; xMax=p.x;}
+            if(val<vMin){vMin=val; xMin=p.x;}
+          }
+          const vL = state.activeDiagram==='M'?pts[0].M : state.activeDiagram==='V'?pts[0].V : pts[0].N;
+          const vR = state.activeDiagram==='M'?pts[pts.length-1].M : state.activeDiagram==='V'?pts[pts.length-1].V : pts[pts.length-1].N;
+          rows.push({id:e.id, tipo:e.type, vL, vR, vMax, xMax, vMin, xMin});
+        }
+        const unitLbl = state.activeDiagram==='M'?'kN·m':'kN';
+        tabela = `
+          <div class="panel-sec" style="margin-top:10px">
+            <div class="panel-head">📋 Valores por Elemento (${state.activeDiagram})</div>
+            <div class="panel-body" style="padding:0">
+              <table class="extremos">
+                <thead><tr>
+                  <th style="text-align:left">Elem</th>
+                  <th style="text-align:right">x=0</th>
+                  <th style="text-align:right">x=L</th>
+                  <th style="text-align:right">Máx</th>
+                  <th style="text-align:right">Mín</th>
+                </tr></thead>
+                <tbody>${rows.map(rw=>`
+                  <tr>
+                    <td>E${rw.id} <span style="color:var(--dim);font-size:9px">(${rw.tipo==='beam'?'viga':'pilar'})</span></td>
+                    <td style="text-align:right">${rw.vL.toFixed(1)}</td>
+                    <td style="text-align:right">${rw.vR.toFixed(1)}</td>
+                    <td style="text-align:right;color:#fbbf24">${rw.vMax.toFixed(1)}<br>
+                      <span style="font-size:9px;color:var(--dim)">x=${rw.xMax.toFixed(2)}m</span></td>
+                    <td style="text-align:right;color:#ef4444">${rw.vMin.toFixed(1)}<br>
+                      <span style="font-size:9px;color:var(--dim)">x=${rw.xMin.toFixed(2)}m</span></td>
+                  </tr>`).join('')}</tbody>
+              </table>
+              <div class="hint" style="padding:6px 9px">Unidade: ${unitLbl}.</div>
+            </div>
+          </div>`;
+      } else if(!r){
+        tabela = `<div class="info-box">Execute a análise primeiro.</div>`;
+      } else if(state.activeDiagram === 'none'){
+        tabela = `<div class="info-box">Selecione um diagrama (M, V ou N) acima.</div>`;
+      }
+      html=`
+      <div class="panel-sec">
+        <div class="panel-head">📈 Diagrama</div>
+        <div class="panel-body">
+          <div class="diagram-tabs">
+            <button data-diag="none" class="${state.activeDiagram==='none'?'active':''}">Nenhum</button>
+            <button data-diag="M" class="${state.activeDiagram==='M'?'active':''}">M</button>
+            <button data-diag="V" class="${state.activeDiagram==='V'?'active':''}">V</button>
+            <button data-diag="N" class="${state.activeDiagram==='N'?'active':''}">N</button>
+          </div>
+          <div class="chk-row"><input type="checkbox" id="chkDiagValues2" ${state.showDiagramValues?'checked':''}>
+            <label for="chkDiagValues2" style="margin:0;cursor:pointer">Mostrar valores nos diagramas</label></div>
+          <div class="chk-row"><input type="checkbox" id="chkIds2" ${state.showElementIds?'checked':''}>
+            <label for="chkIds2" style="margin:0;cursor:pointer">IDs das barras</label></div>
+          <div class="info-box"><b>Diagrama ativo:</b> ${state.activeDiagram==='none'?'nenhum':state.activeDiagram}</div>
+        </div>
+      </div>
+      ${tabela}`;
+    } else if(tab==='aula'){
+      html=`
+      <div class="panel-sec">
+        <div class="panel-head">🎓 Modo Aula</div>
+        <div class="panel-body">
+          <ol style="font-size:12px;line-height:1.9;padding-left:16px;color:var(--txt)">
+            <li><b>Geometria</b> (vãos variáveis, balanços)</li>
+            <li><b>Rigidez global</b> — K_lat, K_vert, T</li>
+            <li><b>Peso próprio</b> — γ·b·h</li>
+            <li><b>Cargas g, q, vento</b></li>
+            <li><b>Cordoalha</b> — Ø e área</li>
+            <li><b>Protensão</b> — fpi, nº cordoalhas</li>
+            <li><b>Ancoragens independentes</b></li>
+            <li><b>Balanceamento</b> — w = 8·e·P/L²</li>
+            <li><b>Análise K·U=F</b></li>
+            <li><b>Esforços M, V, N</b></li>
+            <li><b>🎬 Simulação em loop</b> — ida e volta contínua</li>
+          </ol>
+        </div>
+      </div>
+      <div class="panel-sec">
+        <div class="panel-head">🧪 Teste do Motor</div>
+        <div class="panel-body">
+          <button class="btn" id="btnTest">▶ Executar Teste</button>
+          <div id="testResult" style="margin-top:8px"></div>
+        </div>
+      </div>`;
+    }
+    el.innerHTML=html;
+    bindSidebarEvents();
+    if(tab==='protensao')renderLosses();
+  }catch(e){
+    console.warn('renderSidebar:', e);
+    document.getElementById('sidebarContent').innerHTML = `<div class="err-box">🔴 Erro: ${e.message}</div>`;
+  }
+}
+
+function renderResults(){
+  try{
+    const el=document.getElementById('resultsContent');
+    const r=state.result;
+    if(!r){el.innerHTML=`<div class="info-box">Clique em <b>▶ CALCULAR ESTRUTURA</b>.</div>`;return;}
+    if(!r.ok){el.innerHTML=`<div class="err-box">🔴 ${r.error}</div>`;return;}
+    const m=state.model, w=r.wTot;
+    let maxM=0,maxV=0,maxUy=0;
+    for(const e of m.elements){
+      const fr=r.forces.find(f=>f.elemId===e.id);
+      if(!fr)continue;
+      const cab=m.cables.find(c=>c.elemId===e.id);
+      const pts=internalDiagram(e,fr,w,cab);
+      for(const p of pts){
+        if(Math.abs(p.M)>Math.abs(maxM))maxM=p.M;
+        if(Math.abs(p.V)>Math.abs(maxV))maxV=p.V;
+      }
+    }
+    for(let i=0;i<m.nodes.length;i++){const uy=Math.abs(r.U[i*3+1]);if(uy>maxUy)maxUy=uy;}
+    const cab0=m.cables[0];
+    const Pef=cab0?cab0.P:0;
+    const cp=concProps(m.params.fck);
+    const sec=m.elements.find(e=>e.type==='beam').section;
+    const tens=sectionStress(cab0?cab0.P:0, maxM, sec);
+    const MRd=(sec.b*sec.h*sec.h/6)*1e-6*cp.fcd*1000;
+    const fUtil=Math.min(200, Math.abs(maxM)/MRd*100);
+    const status=fUtil<70?'ok':fUtil<100?'warn':'err';
+    const statusTxt=fUtil<70?'🟢 APROVADO':fUtil<100?'🟡 ATENÇÃO':'🔴 NÃO ATENDE';
+    let sumFy=0, maxMz=0, sumFx=0;
+    for(let i=0;i<m.nodes.length;i++){
+      if(m.nodes[i].fix[0] && m.nodes[i].fix[1]){
+        sumFy += r.reactions[i*3+1]||0;
+        sumFx += r.reactions[i*3+0]||0;
+        const Mz=r.reactions[i*3+2]||0;
+        if(Math.abs(Mz)>Math.abs(maxMz)) maxMz=Mz;
+      }
+    }
+    const bal = computeBalancing();
+    const balPct = bal ? bal.pctAchieved : 0;
+    const rig = computeFrameStiffness();
+    el.innerHTML=`
+      <div class="stat-big"><div class="label">Momento máximo</div>
+        <div class="val">${maxM.toFixed(1)}<span class="unit">kN·m</span></div></div>
+      <div class="stat-big"><div class="label">Cortante máximo</div>
+        <div class="val">${maxV.toFixed(1)}<span class="unit">kN</span></div></div>
+      <div class="stat-big"><div class="label">Flecha máxima</div>
+        <div class="val">${(maxUy*1000).toFixed(2)}<span class="unit">mm</span></div></div>
+      <div class="stat-big"><div class="label">Força efetiva Pef</div>
+        <div class="val">${Pef.toFixed(0)}<span class="unit">kN</span></div></div>
+      <div class="stat-big ${balPct>80?'green':balPct>50?'orange':'red'}">
+        <div class="label">Balanceamento</div>
+        <div class="val">${balPct.toFixed(0)}<span class="unit">%</span></div>
+      </div>
+      <div class="stat-big"><div class="label">Utilização M/M_Rd</div>
+        <div class="val">${fUtil.toFixed(1)}<span class="unit">%</span></div></div>
+      ${rig?`
+      <div class="panel-sec"><div class="panel-head">💪 Rigidez Global</div>
+        <div class="panel-body">
+          <div class="stat"><span>K lateral / andar</span><span>${rig.K_lat.toFixed(0)} kN/m</span></div>
+          <div class="stat"><span>K vertical total</span><span>${rig.K_vert.toFixed(0)} kN/m</span></div>
+          <div class="stat"><span>Período T</span><span>${rig.T.toFixed(3)} s</span></div>
+        </div></div>`:''}
+      <div class="panel-sec"><div class="panel-head">⚖ Reações Globais</div>
+        <div class="panel-body">
+          <div class="stat"><span>Σ Fx</span><span>${sumFx.toFixed(2)} kN</span></div>
+          <div class="stat"><span>Σ Fy</span><span>${sumFy.toFixed(2)} kN</span></div>
+          <div class="stat"><span>Mz máx</span><span>${maxMz.toFixed(2)} kN·m</span></div>
+        </div></div>
+      <div class="panel-sec"><div class="panel-head">Status</div>
+        <div class="panel-body"><span class="badge ${status}">${statusTxt}</span></div></div>
+      <div class="panel-sec"><div class="panel-head">Tensões na viga</div>
+        <div class="panel-body">
+          <div class="stat"><span>σ topo</span><span>${tens.sigmaTop.toFixed(2)} MPa</span></div>
+          <div class="stat"><span>σ base</span><span>${tens.sigmaBot.toFixed(2)} MPa</span></div>
+        </div></div>`;
+  }catch(e){ console.warn('renderResults:', e); }
+}
+
+function renderLosses(){
+  const el=document.getElementById('lossesBox');
+  if(!el)return;
+  const cab0=state.model.cables[0];
+  if(!cab0||!cab0.perdas){el.innerHTML='<div class="hint">Sem dados.</div>';return;}
+  const p=cab0.perdas;
+  el.innerHTML=`
+    <div class="stat"><span>P inicial</span><span>${p.Pi.toFixed(0)} kN</span></div>
+    <div class="stat"><span>Atrito</span><span>${p.atrito.toFixed(1)} kN (${p.pct.atrito.toFixed(1)}%)</span></div>
+    <div class="stat"><span>Ancoragem</span><span>${p.ancoragem.toFixed(1)} kN (${p.pct.ancoragem.toFixed(1)}%)</span></div>
+    <div class="stat"><span>Encurtamento</span><span>${p.encurtamento.toFixed(1)} kN (${p.pct.encurtamento.toFixed(1)}%)</span></div>
+    <div class="stat"><span>Retração</span><span>${p.retracao.toFixed(1)} kN (${p.pct.retracao.toFixed(1)}%)</span></div>
+    <div class="stat"><span>Fluência</span><span>${p.fluencia.toFixed(1)} kN (${p.pct.fluencia.toFixed(1)}%)</span></div>
+    <div class="stat"><span>Relaxação</span><span>${p.relaxacao.toFixed(1)} kN (${p.pct.relaxacao.toFixed(1)}%)</span></div>
+    <div class="stat"><span><b>Total</b></span><span><b>${p.total.toFixed(1)} kN (${p.pct.total.toFixed(1)}%)</b></span></div>
+    <div class="stat"><span><b>Pef</b></span><span><b>${p.Pef.toFixed(0)} kN</b></span></div>
+    <div class="warn-box">Formulação simplificada. Verificar NBR 6118.</div>`;
+}
+
+function renderLegend(){
+  const el=document.getElementById('legend');
+  el.innerHTML=`
+    <span><span class="dot" style="background:#00d4ff"></span><b>Vigas</b></span>
+    <span><span class="dot" style="background:#8ba3bc"></span><b>Pilares</b></span>
+    <span><span class="dot" style="background:#ff8a3d"></span><b>Ancoragem</b></span>
+    <span><span class="dot" style="background:#ef4444"></span><b>Balanço</b></span>
+    <span><span class="dot" style="background:#3b82f6"></span><b>Nodal</b></span>
+    <span style="color:#8ba3bc">🏷 E0, E1… = elementos</span>`;
+}
+
+function bindSidebarEvents(){
+  try{
+    const $=id=>document.getElementById(id);
+
+    const rebuildCables = () => {
+      const m = state.model;
+      const sec = m.elements.find(e=>e.type==='beam')?.section;
+      const maxE = sec ? (sec.h/2 - 4 - 1.3)/100 : 0.25;
+      const p = state.prestress;
+      const pp = m.params;
+      if(!pp.xCoords || pp.xCoords.length === 0){toast('⚠ Reconstrua o pórtico','err');return false;}
+      const eAncEsqM = (p.eAncEsq ?? -5)/100;
+      const eAncDirM = (p.eAncDir ?? -5)/100;
+      const eBalEsqM = (p.eBalEsq ?? -24)/100;
+      const eBalDirM = (p.eBalDir ?? -24)/100;
+      const eSupM    = (p.eSup ?? -20)/100;
+      const eMidM    = (p.eMid ?? 24)/100;
+      const LsAncM   = p.LsAnc ?? 0.50;
+      const checks = [['eAncEsq', eAncEsqM], ['eAncDir', eAncDirM],
+                      ['eBalEsq', eBalEsqM], ['eBalDir', eBalDirM],
+                      ['eSup', eSupM], ['eMid', eMidM]];
+      for(const [name, v] of checks){
+        if(Math.abs(v) > maxE){
+          toast(`⚠ ${name} = ${(v*100).toFixed(1)} cm excede máx. de ${(maxE*100).toFixed(1)} cm`,'err');
+          return false;
+        }
+      }
+      const excByClass = {
+        'balLeft':  { e: eBalEsqM, Ls: LsAncM },
+        'balRight': { e: eBalDirM, Ls: LsAncM },
+        'endLeft':  { e: eAncEsqM, Ls: LsAncM },
+        'endRight': { e: eAncDirM, Ls: LsAncM },
+        'support':  { e: eSupM,    Ls: 0 }
+      };
+      for(const e of m.elements){
+        if(e.type!=='beam') continue;
+        const cab = m.cables.find(c=>c.elemId===e.id);
+        if(!cab) continue;
+        const lc = m.nodes[e.ni].colClass || 'support';
+        const rc = m.nodes[e.nj].colClass || 'support';
+        const lcfg = excByClass[lc], rcfg = excByClass[rc];
+        cab.leftIsEnd = (lc !== 'support');
+        cab.rightIsEnd = (rc !== 'support');
+        cab.leftNodeClass = lc;
+        cab.rightNodeClass = rc;
+        cab.eLeft = lcfg.e;
+        cab.eRight = rcfg.e;
+        cab.eMid = eMidM;
+        cab.LsLeft = lcfg.Ls;
+        cab.LsRight = rcfg.Ls;
+      }
+      applyPrestressToCables();
+      return true;
+    };
+
+    // Helper: aplica mudança e FORÇA reanálise completa
+    const applyAndAnalyze = (nome, msg) => {
+      if(!rebuildCables()) return;
+      state.result = null;       // invalida resultado antigo
+      runAnalysis();             // recalcula TUDO
+      toast(msg);
+      // NÃO chama draw() nem renderSidebar() porque runAnalysis já faz
+    };
+
+    if($('btnRebuild')) $('btnRebuild').onclick=()=>{
+      const nF = +$('inNFloor').value;
+      const h  = +$('inHeight').value;
+      const spansTxt = $('inSpans').value || '';
+      const spans = spansTxt.split(',').map(s=>parseFloat(s.trim())).filter(v=>!isNaN(v) && v>0);
+      if(spans.length === 0){ toast('⚠ Informe ao menos 1 vão','err'); return; }
+      if(spans.length > 8){ toast('⚠ Máx. 8 vãos','err'); return; }
+      const balEsq = +$('inBalEsq').value || 0;
+      const balDir = +$('inBalDir').value || 0;
+      const bb=+$('inBB').value,bh=+$('inBH').value;
+      const cb=+$('inCB').value,ch=+$('inCH').value;
+      const fck=+$('inFck').value;
+      if(nF<1||h<1||bb<10||bh<20||cb<15||ch<15||balEsq<0||balDir<0){
+        toast('⚠ DADOS INVÁLIDOS','err'); return;
+      }
+      state.model.buildFrame(nF, spans, h, bb, bh, cb, ch, fck, balEsq, balDir);
+      state.result = null;
+      state.animProgress = 1;
+      state.animating = false;
+      rebuildCables();
+      runAnalysis();
+      toast(`Pórtico: ${spans.length} vão${spans.length>1?'s':''}${balEsq||balDir?' + balanços':''}`);
+      renderSidebar(); draw();
+    };
+    if($('chkSelfWeight')) $('chkSelfWeight').onchange=e=>{
+      state.loads.includeSelfWeight=e.target.checked;
+      renderSidebar(); draw();
+    };
+    if($('chkShowReactions')) $('chkShowReactions').onchange=e=>{
+      state.showReactions=e.target.checked;
+      const b=document.getElementById('btnReactions');
+      if(b) b.classList.toggle('active', state.showReactions);
+      draw();
+    };
+    if($('chkShowInternal')) $('chkShowInternal').onchange=e=>{
+      state.showInternalNodes=e.target.checked;
+      const b=document.getElementById('btnInternalNodes');
+      if(b) b.classList.toggle('active', state.showInternalNodes);
+      draw();
+    };
+    if($('chkShowIds')) $('chkShowIds').onchange=e=>{
+      state.showElementIds=e.target.checked;
+      const b=document.getElementById('btnIds');
+      if(b) b.classList.toggle('active', state.showElementIds);
+      draw();
+    };
+    if($('chkIds2')) $('chkIds2').onchange=e=>{
+      state.showElementIds=e.target.checked;
+      const b=document.getElementById('btnIds');
+      if(b) b.classList.toggle('active', state.showElementIds);
+      draw();
+    };
+    if($('chkShowDiagValues')) $('chkShowDiagValues').onchange=e=>{
+      state.showDiagramValues=e.target.checked;
+      const b=document.getElementById('btnDiagValues');
+      if(b) b.classList.toggle('active', state.showDiagramValues);
+      draw();
+    };
+    if($('chkDiagValues2')) $('chkDiagValues2').onchange=e=>{
+      state.showDiagramValues=e.target.checked;
+      const b=document.getElementById('btnDiagValues');
+      if(b) b.classList.toggle('active', state.showDiagramValues);
+      draw();
+    };
+    if($('btnApplyLoads')) $('btnApplyLoads').onclick=()=>{
+      const g=+$('inLoadG').value,q=+$('inLoadQ').value,w=+$('inLoadWind').value;
+      if(g<0||q<0||w<0){toast('⚠ Negativos','err');return;}
+      state.loads.g=g; state.loads.q=q; state.loads.wind=w;
+      runAnalysis();
+      toast('✓ Cargas aplicadas');
+      renderSidebar(); draw();
+    };
+    if($('btnApplyCP')) $('btnApplyCP').onclick=()=>{
+      state.prestress.cordKey=$('inCordKey').value;
+      state.prestress.nCordoalhas=+$('inNCord').value||6;
+      state.prestress.P0frac=+$('inFpi').value||0.77;
+      applyPrestressToCables();
+      state.result = null;
+      runAnalysis();
+      toast('✓ Protensão aplicada');
+      renderSidebar(); draw();
+    };
+    if($('inCordKey')) $('inCordKey').onchange=()=>{
+      const cord = CORD_OPTIONS[$('inCordKey').value];
+      if($('inCableDiam')) $('inCableDiam').value = cord.diam_mm;
+      if($('inCableArea')) $('inCableArea').value = cord.area_mm2;
+    };
+    // ⚓ Ancoragens esq/dir — com reanálise forçada
+    if($('btnApplyAnc')) $('btnApplyAnc').onclick=()=>{
+      const vEsq = +$('inEAncEsq').value || 0;
+      const vDir = +$('inEAncDir').value || 0;
+      state.prestress.eAncEsq = vEsq;
+      state.prestress.eAncDir = vDir;
+      applyAndAnalyze('anc', `✓ Ancoragens: esq ${vEsq} · dir ${vDir} cm`);
+    };
+    // 🏗 Balanços — com reanálise forçada
+    if($('btnApplyBal')) $('btnApplyBal').onclick=()=>{
+      if($('inEBalEsq')) state.prestress.eBalEsq = +$('inEBalEsq').value || 0;
+      if($('inEBalDir')) state.prestress.eBalDir = +$('inEBalDir').value || 0;
+      applyAndAnalyze('bal', `✓ Balanços: esq ${state.prestress.eBalEsq} · dir ${state.prestress.eBalDir} cm`);
+    };
+    // 📏 LsAnc — com reanálise forçada
+    if($('btnApplyLs')) $('btnApplyLs').onclick=()=>{
+      state.prestress.LsAnc = +$('inLsAnc').value || 0;
+      applyAndAnalyze('ls', `✓ LsAnc = ${state.prestress.LsAnc.toFixed(2)} m`);
+    };
+    // 🔺 Apoio contínuo — com reanálise forçada
+    if($('btnApplySup')) $('btnApplySup').onclick=()=>{
+      state.prestress.eSup = +$('inESup').value||0;
+      applyAndAnalyze('sup', `✓ eSup = ${state.prestress.eSup} cm`);
+    };
+    // 〰 Meio do vão — com reanálise forçada
+    if($('btnApplyMid')) $('btnApplyMid').onclick=()=>{
+      state.prestress.eMid = +$('inEMid').value||0;
+      applyAndAnalyze('mid', `✓ eMid = ${state.prestress.eMid} cm`);
+    };
+    if($('btnSolve')) $('btnSolve').onclick=()=>runAnalysis();
+    if($('inDefScale')) $('inDefScale').onchange=e=>{state.defScale=+e.target.value; draw();};
+    if($('inAnimDur')) $('inAnimDur').onchange=e=>{
+      state.animDuration = Math.max(300, Math.min(10000, (+e.target.value || 2.2) * 1000));
+    };
+    if($('inAnimDur2')) $('inAnimDur2').onchange=e=>{
+      state.animDuration = Math.max(300, Math.min(10000, (+e.target.value || 2.2) * 1000));
+    };
+    document.querySelectorAll('[data-diag]').forEach(btn=>{
+      btn.onclick=()=>{
+        state.activeDiagram=btn.dataset.diag;
+        renderSidebar(); draw();
+      };
+    });
+    if($('btnAnim')) $('btnAnim').onclick=()=>{
+      if(state.animating) pauseAnimation(); else startAnimation();
+    };
+    if($('btnAnim2')) $('btnAnim2').onclick=()=>{
+      if(state.animating) pauseAnimation(); else startAnimation();
+    };
+    if($('btnResetAnim2')) $('btnResetAnim2').onclick=()=>resetAnimation();
+    if($('btnResetAnim2b')) $('btnResetAnim2b').onclick=()=>resetAnimation();
+    if($('btnBalApply')) $('btnBalApply').onclick=()=>{
+      state.balancing.percent = +$('inBalPct').value || 100;
+      state.balancing.includeG = $('chkBalG').checked;
+      state.balancing.includeSW = $('chkBalSW').checked;
+      state.balancing.includeQ = +$('inBalQ').value || 0;
+      toast('✓ Objetivo atualizado'); renderSidebar(); draw();
+    };
+    if($('btnBalP')) $('btnBalP').onclick=()=>{
+      const bal = computeBalancing(); if(!bal) return;
+      state.prestress.nCordoalhas = bal.nCord;
+      applyPrestressToCables();
+      state.result = null;
+      runAnalysis();
+      toast(`✓ ${bal.nCord} cordoalhas`);
+      renderSidebar(); draw();
+    };
+    if($('btnBalE')) $('btnBalE').onclick=()=>{
+      const bal = computeBalancing(); if(!bal) return;
+      state.prestress.eMid = (bal.eSupMedio + bal.e_req) * 100;
+      applyAndAnalyze('bale', `✓ eMid = ${state.prestress.eMid.toFixed(1)} cm`);
+    };
+    if($('btnSave')) $('btnSave').onclick=saveProject;
+    if($('btnLoad')) $('btnLoad').onclick=loadProject;
+    if($('btnJson')) $('btnJson').onclick=exportJSON;
+    if($('btnCsv')) $('btnCsv').onclick=exportCSV;
+    if($('btnPrint')) $('btnPrint').onclick=showReport;
+    if($('btnTest')) $('btnTest').onclick=runEngineTest;
+  }catch(e){ console.warn('bindSidebarEvents:', e); }
+}
+
+function runAnalysis(){
+  try{
+    if(!state.model || !state.model.elements.length){ toast('⚠ Sem modelo','err'); return; }
+    const solver=new FrameSolver(state.model);
+    const res=solver.solve(state.loads);
+    state.result=res;
+    if(!res.ok)toast('🔴 '+res.error,'err');
+    state.animProgress = 1;
+    state.animDirection = 1;
+    state.animating = false;
+    state.animLastTime = 0;
+    const btnP = document.getElementById('btnPlay');
+    if(btnP){ btnP.classList.remove('active'); btnP.textContent = '▶ Simular'; }
+    draw(); renderResults();
+  }catch(e){
+    console.warn('runAnalysis:', e);
+    toast('🔴 '+e.message,'err');
+  }
+}
+
+function runEngineTest(){
+  try{
+    const m=new FrameModel();
+    const Ec=30e6, sec=rectProps(30,60);
+    const A=sec.A*1e-4, I=sec.I*1e-8;
+    m.addNode(0,0,[true,true,true]);
+    m.addNode(10,0,[false,true,false]);
+    const e=m.addElement(0,1,'beam',sec);
+    e.E=Ec; e.A=A; e.I=I;
+    m.params={nFloors:1,spans:[10],span:10,nBays:1,height:1,fck:30,
+              xCoords:[0,10],xMain:[0,10],nMain:2,nFull:2,offset:0,
+              hasBalEsq:false,hasBalDir:false,idMap:{}};
+    m.nodes[0].colClass = 'endLeft';
+    m.nodes[1].colClass = 'endRight';
+    const solver=new FrameSolver(m);
+    const res=solver.solve({g:10,q:0,wind:0,includeSelfWeight:false});
+    const R1=res.reactions[1], R2=res.reactions[4];
+    const flecha=res.U[1]*1000;
+    const flechaEsp=5*10*Math.pow(10,4)/(384*Ec*I)*1000;
+    const ok1=Math.abs(Math.abs(R1)-50)<0.5 && Math.abs(Math.abs(R2)-50)<0.5;
+    const ok2=Math.abs(Math.abs(flecha)-flechaEsp)<0.5;
+    document.getElementById('testResult').innerHTML=`
+      <div class="stat"><span>R1</span><span>${R1.toFixed(2)} kN</span></div>
+      <div class="stat"><span>R2</span><span>${R2.toFixed(2)} kN</span></div>
+      <div class="stat"><span>Flecha</span><span>${Math.abs(flecha).toFixed(3)} mm</span></div>
+      <div class="stat"><span>Status</span><span>${(ok1&&ok2)?'🟢 Aprovado':'🔴 Reprovado'}</span></div>`;
+  }catch(e){ console.warn('runEngineTest:', e); }
+}
+
+let toastTimer=null;
+function toast(msg,type=''){
+  const t=document.createElement('div');
+  t.className='toast '+type; t.textContent=msg;
+  document.body.appendChild(t);
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.remove(), type==='err'?4500:2800);
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+document.getElementById('modal').addEventListener('click',e=>{
+  if(e.target.id==='modal')closeModal();
+});
+
+function showReport(){
+  try{
+    const m=state.model, r=state.result;
+    if(!r||!r.ok){toast('Execute o cálculo primeiro','warn');return;}
+    let maxM=0,maxV=0,maxN=0,maxUy=0;
+    const w=r.wTot;
+    for(const e of m.elements){
+      const fr=r.forces.find(f=>f.elemId===e.id);
+      if(!fr)continue;
+      const cab=m.cables.find(c=>c.elemId===e.id);
+      const pts=internalDiagram(e,fr,w,cab);
+      for(const p of pts){
+        if(Math.abs(p.M)>Math.abs(maxM))maxM=p.M;
+        if(Math.abs(p.V)>Math.abs(maxV))maxV=p.V;
+        if(Math.abs(p.N)>Math.abs(maxN))maxN=p.N;
+      }
+    }
+    for(let i=0;i<m.nodes.length;i++){const uy=Math.abs(r.U[i*3+1]);if(uy>maxUy)maxUy=uy;}
+    const cab0=m.cables[0], cp=concProps(m.params.fck);
+    const sec=m.elements.find(e=>e.type==='beam').section;
+    const perdas=cab0?.perdas;
+    const tens=sectionStress(cab0?cab0.P:0, maxM, sec);
+    const MRd=(sec.b*sec.h*sec.h/6)*1e-6*cp.fcd*1000;
+    const fUtil=Math.min(200, Math.abs(maxM)/MRd*100);
+    const p=state.prestress;
+    const cord=p.cord||CORD_OPTIONS[p.cordKey];
+    const bal = computeBalancing();
+    const rig = computeFrameStiffness();
+
+    let rowsAll='';
+    for(let i=0;i<m.nodes.length;i++){
+      const nd=m.nodes[i];
+      const isFix = nd.fix[0] && nd.fix[1];
+      let Fx, Fy, Mz, tipo;
+      if(isFix){
+        Fx=r.reactions[i*3]||0; Fy=r.reactions[i*3+1]||0; Mz=r.reactions[i*3+2]||0;
+        tipo='⚖ Apoio';
+      } else {
+        Fx=r.nodalForces?r.nodalForces[i*3]:0;
+        Fy=r.nodalForces?r.nodalForces[i*3+1]:0;
+        Mz=r.nodalForces?r.nodalForces[i*3+2]:0;
+        tipo='🔵 Nodal';
+      }
+      rowsAll += `<tr><td>N${i}</td><td>${tipo}</td>
+               <td>${Fx.toFixed(2)}</td><td>${Fy.toFixed(2)}</td>
+               <td>${Mz.toFixed(2)}</td></tr>`;
+    }
+
+    const spansList = m.params.spans.map((s,i)=>`V${i+1}=${s.toFixed(2)}m`).join(' · ');
+
+    document.getElementById('modalBody').innerHTML=`
+      <h2>📄 MEMÓRIA DE CÁLCULO</h2>
+      <p style="color:var(--dim);font-size:11px">APAVAN ENGENHARIA E CONSULTORIA — Pórtico Protendido v2.6</p>
+
+      <h3>1. Geometria</h3>
+      <table>
+        <tr><td>Pavimentos</td><td>${m.params.nFloors}</td></tr>
+        <tr><td>Vãos (${m.params.spans.length})</td><td>${spansList}</td></tr>
+        <tr><td>Balanço esq / dir</td><td>${(m.params.balEsq||0).toFixed(2)} m / ${(m.params.balDir||0).toFixed(2)} m</td></tr>
+        <tr><td>Altura</td><td>${m.params.height} m</td></tr>
+        <tr><td>Viga / Pilar</td><td>${m.params.beamB}×${m.params.beamH} / ${m.params.colB}×${m.params.colH} cm</td></tr>
+      </table>
+
+      <h3>2. Rigidez Global</h3>
+      ${rig?`<table>
+        <tr><td>K lateral / andar</td><td>${rig.K_lat.toFixed(0)} kN/m</td></tr>
+        <tr><td>K lateral total</td><td>${rig.K_lat_total.toFixed(0)} kN/m</td></tr>
+        <tr><td>K vertical</td><td>${rig.K_vert.toFixed(0)} kN/m</td></tr>
+        <tr><td>Período T</td><td>${rig.T.toFixed(3)} s</td></tr>
+        <tr><td>GDL</td><td>${rig.gdl}</td></tr>
+      </table>`:''}
+
+      <h3>3. Carregamentos</h3>
+      <table>
+        <tr><th>Parcela</th><th>Valor (kN/m)</th></tr>
+        <tr><td>Permanente g</td><td>${state.loads.g}</td></tr>
+        <tr><td>Variável q</td><td>${state.loads.q}</td></tr>
+        <tr><td>Peso próprio</td><td>${state.loads.includeSelfWeight?r.sw.toFixed(3):'0'}</td></tr>
+        <tr><td><b>Total</b></td><td><b>${w.toFixed(3)}</b></td></tr>
+      </table>
+
+      <h3>4. Cordoalha</h3>
+      <table>
+        <tr><td>Tipo</td><td>${cord.nome}</td></tr>
+        <tr><td>Ø / Área</td><td>${cord.diam_mm} mm / ${cord.area_mm2} mm²</td></tr>
+        <tr><td>Cordoalhas / cabo</td><td>${p.nCordoalhas}</td></tr>
+        <tr><td>Pi / fpi</td><td>${(p.Pi||0).toFixed(0)} kN / ${(p.fpi||0).toFixed(0)} MPa</td></tr>
+      </table>
+
+      <h3>5. Trajetória — Ancoragens</h3>
+      <table>
+        <tr><th>Local</th><th>e (cm)</th></tr>
+        <tr><td>Extremo ESQUERDO</td><td>${p.eAncEsq}</td></tr>
+        <tr><td>Extremo DIREITO</td><td>${p.eAncDir}</td></tr>
+        ${m.params.hasBalEsq?`<tr><td>Balanço esquerdo</td><td>${p.eBalEsq}</td></tr>`:''}
+        ${m.params.hasBalDir?`<tr><td>Balanço direito</td><td>${p.eBalDir}</td></tr>`:''}
+        <tr><td>Apoio contínuo</td><td>${p.eSup}</td></tr>
+        <tr><td>Meio do vão</td><td>${p.eMid}</td></tr>
+        <tr><td>LsAnc</td><td>${p.LsAnc.toFixed(2)} m</td></tr>
+      </table>
+
+      <h3>6. Balanceamento</h3>
+      ${bal?`<table>
+        <tr><td>Drape e</td><td>${(bal.drape*100).toFixed(1)} cm</td></tr>
+        <tr><td>Pef</td><td>${bal.Pef.toFixed(0)} kN</td></tr>
+        <tr><td>Vão médio L</td><td>${bal.L.toFixed(2)} m</td></tr>
+        <tr><td><b>w_bal</b></td><td><b>${bal.wBal.toFixed(3)} kN/m</b></td></tr>
+        <tr><td>% atingido</td><td>${bal.pctAchieved.toFixed(1)} %</td></tr>
+      </table>`:''}
+
+      <h3>7. Perdas</h3>
+      ${perdas?`<table>
+        <tr><th>Perda</th><th>kN</th><th>%</th></tr>
+        <tr><td>Atrito</td><td>${perdas.atrito.toFixed(1)}</td><td>${perdas.pct.atrito.toFixed(2)}</td></tr>
+        <tr><td>Ancoragem</td><td>${perdas.ancoragem.toFixed(1)}</td><td>${perdas.pct.ancoragem.toFixed(2)}</td></tr>
+        <tr><td>Encurtamento</td><td>${perdas.encurtamento.toFixed(1)}</td><td>${perdas.pct.encurtamento.toFixed(2)}</td></tr>
+        <tr><td>Retração</td><td>${perdas.retracao.toFixed(1)}</td><td>${perdas.pct.retracao.toFixed(2)}</td></tr>
+        <tr><td>Fluência</td><td>${perdas.fluencia.toFixed(1)}</td><td>${perdas.pct.fluencia.toFixed(2)}</td></tr>
+        <tr><td>Relaxação</td><td>${perdas.relaxacao.toFixed(1)}</td><td>${perdas.pct.relaxacao.toFixed(2)}</td></tr>
+        <tr><td><b>Total / Pef</b></td><td><b>${perdas.total.toFixed(1)}</b></td>
+            <td><b>${perdas.pct.total.toFixed(2)}% → ${perdas.Pef.toFixed(0)} kN</b></td></tr>
+      </table>`:''}
+
+      <h3>8. Forças Nodais</h3>
+      <table>
+        <tr><th>Nó</th><th>Tipo</th><th>Fx (kN)</th><th>Fy (kN)</th><th>Mz (kN·m)</th></tr>
+        ${rowsAll}
+      </table>
+
+      <h3>9. Esforços Máximos</h3>
+      <table>
+        <tr><td>Momento</td><td>${maxM.toFixed(2)} kN·m</td></tr>
+        <tr><td>Cortante</td><td>${maxV.toFixed(2)} kN</td></tr>
+        <tr><td>Normal</td><td>${maxN.toFixed(2)} kN</td></tr>
+        <tr><td>Flecha</td><td>${(maxUy*1000).toFixed(3)} mm</td></tr>
+      </table>
+
+      <h3>10. Tensões e Verificação</h3>
+      <table>
+        <tr><td>σ topo</td><td>${tens.sigmaTop.toFixed(3)} MPa</td></tr>
+        <tr><td>σ base</td><td>${tens.sigmaBot.toFixed(3)} MPa</td></tr>
+        <tr><td>Utilização M/M_Rd</td><td>${fUtil.toFixed(1)}%</td></tr>
+      </table>
+
+      <h3>11. Limitações</h3>
+      <p>Simulador educacional. Verificar NBR 6118, 7483, 8681, 6120 vigentes.</p>`;
+    document.getElementById('modal').classList.add('show');
+  }catch(e){ console.warn('showReport:', e); toast('Erro ao gerar relatório','err'); }
+}
+
+function serialize(){
+  return {
+    version:'2.6',
+    model:{
+      params:state.model.params,
+      nodes:state.model.nodes.map(n=>({x:n.x,y:n.y,fix:n.fix,colClass:n.colClass,isGround:n.isGround})),
+      elements:state.model.elements.map(e=>({ni:e.ni,nj:e.nj,type:e.type,section:e.section,E:e.E,A:e.A,I:e.I})),
+      cables:state.model.cables.map(c=>({
+        elemId:c.elemId, eLeft:c.eLeft, eRight:c.eRight, eMid:c.eMid,
+        LsLeft:c.LsLeft, LsRight:c.LsRight,
+        leftIsEnd:c.leftIsEnd, rightIsEnd:c.rightIsEnd,
+        leftNodeClass:c.leftNodeClass, rightNodeClass:c.rightNodeClass,
+        nCordoalhas:c.nCordoalhas,Ap:c.Ap,P:c.P,Pi:c.Pi,fpi:c.fpi,fpk:c.fpk}))
+    },
+    loads:state.loads,
+    prestress:state.prestress,
+    balancing:state.balancing,
+    view:{showReactions:state.showReactions, showInternalNodes:state.showInternalNodes,
+          showDiagramValues:state.showDiagramValues, showElementIds:state.showElementIds,
+          activeDiagram:state.activeDiagram, animDuration:state.animDuration}
+  };
+}
+function saveProject(){
+  const ok = safeSet('apavan_project', JSON.stringify(serialize()));
+  if(ok) toast('💾 Projeto salvo');
+  else toast('⚠ Armazenamento bloqueado neste navegador','warn');
+}
+function loadProject(){
+  try{
+    const data = safeGet('apavan_project');
+    if(!data){ toast('Nenhum projeto salvo','warn'); return; }
+    const obj = JSON.parse(data);
+    const params = obj.model.params;
+    const spans = params.spans || [params.span || 6];
+    state.model.buildFrame(
+      params.nFloors || 1, spans, params.height || 3.5,
+      params.beamB || 25, params.beamH || 60,
+      params.colB || 30, params.colH || 50, params.fck || 40,
+      params.balEsq || 0, params.balDir || 0
+    );
+    state.loads=obj.loads || state.loads;
+    state.prestress = obj.prestress || state.prestress;
+    if(typeof state.prestress.eAncEsq === 'undefined') state.prestress.eAncEsq = state.prestress.eAnc ?? -5;
+    if(typeof state.prestress.eAncDir === 'undefined') state.prestress.eAncDir = state.prestress.eAnc ?? -5;
+    if(typeof state.prestress.eBalEsq === 'undefined') state.prestress.eBalEsq = -24;
+    if(typeof state.prestress.eBalDir === 'undefined') state.prestress.eBalDir = -24;
+    if(typeof state.prestress.eSup === 'undefined') state.prestress.eSup = -20;
+    if(typeof state.prestress.eMid === 'undefined') state.prestress.eMid = 24;
+    if(typeof state.prestress.LsAnc === 'undefined') state.prestress.LsAnc = 0.5;
+    if(typeof state.prestress.cordKey === 'undefined') state.prestress.cordKey = 'CP-190-RB-12.7';
+    if(typeof state.prestress.nCordoalhas === 'undefined') state.prestress.nCordoalhas = 6;
+    if(typeof state.prestress.P0frac === 'undefined') state.prestress.P0frac = 0.77;
+    if(obj.balancing) state.balancing=obj.balancing;
+    if(obj.view){
+      if(typeof obj.view.showReactions!=='undefined') state.showReactions=obj.view.showReactions;
+      if(typeof obj.view.showInternalNodes!=='undefined') state.showInternalNodes=obj.view.showInternalNodes;
+      if(typeof obj.view.showDiagramValues!=='undefined') state.showDiagramValues=obj.view.showDiagramValues;
+      if(typeof obj.view.showElementIds!=='undefined') state.showElementIds=obj.view.showElementIds;
+      if(typeof obj.view.activeDiagram!=='undefined') state.activeDiagram=obj.view.activeDiagram;
+      if(typeof obj.view.animDuration!=='undefined') state.animDuration=obj.view.animDuration;
+    }
+    state.result = null;
+    state.animProgress = 1;
+    state.animating = false;
+    toast('📂 Projeto carregado');
+    runAnalysis();
+    renderSidebar(); draw();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(serialize(),null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='apavan_portico.json'; a.click();
+}
+function exportCSV(){
+  try{
+    const m=state.model, r=state.result;
+    if(!r||!r.ok){toast('Execute o cálculo primeiro','warn');return;}
+    let csv='Tipo,ID,x(m),M(kN.m),V(kN),N(kN)\n';
+    const w=r.wTot;
+    for(const e of m.elements){
+      const fr=r.forces.find(f=>f.elemId===e.id);
+      if(!fr)continue;
+      const cab=m.cables.find(c=>c.elemId===e.id);
+      const pts=internalDiagram(e,fr,w,cab);
+      for(const p of pts){
+        csv+=`Esforco,E${e.id},${p.x.toFixed(2)},${p.M.toFixed(2)},${p.V.toFixed(2)},${p.N.toFixed(2)}\n`;
+      }
+    }
+    csv+=`\nTipo,ID,Fx(kN),Fy(kN),Mz(kN.m)\n`;
+    for(let i=0;i<m.nodes.length;i++){
+      const nd=m.nodes[i];
+      const isFix = nd.fix[0] && nd.fix[1];
+      let Fx, Fy, Mz, tipo;
+      if(isFix){
+        Fx=r.reactions[i*3]||0; Fy=r.reactions[i*3+1]||0; Mz=r.reactions[i*3+2]||0;
+        tipo='Reacao';
+      } else {
+        Fx=r.nodalForces?r.nodalForces[i*3]:0;
+        Fy=r.nodalForces?r.nodalForces[i*3+1]:0;
+        Mz=r.nodalForces?r.nodalForces[i*3+2]:0;
+        tipo='Nodal';
+      }
+      csv+=`${tipo},N${i},${Fx.toFixed(3)},${Fy.toFixed(3)},${Mz.toFixed(3)}\n`;
+    }
+    const p=state.prestress;
+    csv+=`\nAncoragens (cm)\neAncEsq,${p.eAncEsq}\neAncDir,${p.eAncDir}\neBalEsq,${p.eBalEsq}\neBalDir,${p.eBalDir}\neSup,${p.eSup}\neMid,${p.eMid}\n`;
+    const blob=new Blob([csv],{type:'text/csv'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='apavan_esforcos.csv'; a.click();
+  }catch(e){toast('Erro ao exportar','err');}
+}
+
+// ==========================================================================
+// ABAS
+// ==========================================================================
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    state.currentTab=t.dataset.tab;
+    if(!state.result || !state.result.ok){
+      try { runAnalysis(); } catch(e){ console.warn('auto-run:', e); }
+    }
+    if(state.currentTab === 'diagramas' && state.activeDiagram === 'none'){
+      state.activeDiagram = 'M';
+    }
+    renderSidebar(); draw();
+  };
+});
+
+// ==========================================================================
+// TOOLBAR
+// ==========================================================================
+document.getElementById('btnZoomIn').onclick=()=>{state.view.scale*=1.25; updateZoomInfo(); draw();};
+document.getElementById('btnZoomOut').onclick=()=>{state.view.scale/=1.25; updateZoomInfo(); draw();};
+document.getElementById('btnFit').onclick=()=>{
+  const m=state.model; if(!m.nodes.length)return;
+  let minX=1e9,maxX=-1e9,minY=1e9,maxY=-1e9;
+  for(const n of m.nodes){
+    if(n.x<minX)minX=n.x; if(n.x>maxX)maxX=n.x;
+    if(n.y<minY)minY=n.y; if(n.y>maxY)maxY=n.y;
+  }
+  const w=maxX-minX||1, h=maxY-minY||1;
+  const rect=cv.getBoundingClientRect(), margin=160;
+  state.view.scale=Math.min((rect.width-2*margin)/w,(rect.height-2*margin)/h);
+  state.view.x=(minX+maxX)/2; state.view.y=(minY+maxY)/2;
+  updateZoomInfo(); draw();
+};
+document.getElementById('btnDeform').onclick=function(){
+  state.showDeform=!state.showDeform; this.classList.toggle('active',state.showDeform); draw();};
+document.getElementById('btnLoads').onclick=function(){
+  state.showLoads=!state.showLoads; this.classList.toggle('active',state.showLoads); draw();};
+document.getElementById('btnCables').onclick=function(){
+  state.showCables=!state.showCables; this.classList.toggle('active',state.showCables); draw();};
+document.getElementById('btnIds').onclick=function(){
+  state.showElementIds=!state.showElementIds; this.classList.toggle('active',state.showElementIds); draw();};
+document.getElementById('btnReactions').onclick=function(){
+  state.showReactions=!state.showReactions; this.classList.toggle('active',state.showReactions); draw();};
+document.getElementById('btnInternalNodes').onclick=function(){
+  state.showInternalNodes=!state.showInternalNodes; this.classList.toggle('active',state.showInternalNodes); draw();};
+document.getElementById('btnDiagValues').onclick=function(){
+  state.showDiagramValues=!state.showDiagramValues; this.classList.toggle('active',state.showDiagramValues); draw();};
+document.getElementById('btnPlay').onclick=function(){
+  if(state.animating) pauseAnimation(); else startAnimation();
+};
+document.getElementById('btnResetAnim').onclick=()=>resetAnimation();
+
+// ==========================================================================
+// INICIALIZAÇÃO
+// ==========================================================================
+renderSidebar();
+renderLegend();
+resizeCanvas();
+setTimeout(()=>document.getElementById('btnFit').click(),120);
+setTimeout(()=>{
+  runAnalysis();
+  console.log('%c APAVAN v2.6 pronto ', 'background:#22c55e;color:#001a26;padding:2px 6px;border-radius:3px');
+},350);
+</script>
+</body>
+</html>
