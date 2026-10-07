@@ -2,11 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>APAVAN Pórtico Protendido v2.6</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>APAVAN Pórtico Protendido v2.7</title>
 <style>
-<link rel="apple-touch-icon" href="logo.png">
-<link rel="icon" type="image/png" href="logo.png">
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--bg:#0a1420;--panel:#0f1d2e;--panel2:#152438;--panel3:#1b2d44;--border:#1e3a56;
 --txt:#e2ecf5;--dim:#8ba3bc;--accent:#00d4ff;--accent2:#ff8a3d;--ok:#22c55e;--warn:#f59e0b;--err:#ef4444}
@@ -197,23 +195,53 @@ table.extremos td:first-child{font-family:inherit;font-size:11px}
 'use strict';
 
 // ==========================================================================
-// LIMPEZA (sem tocar em serviceWorker — evita o aviso file:// do Chrome)
+// 🖼️ ÍCONE APAVAN — só em http(s), silencioso em file:// (evita aviso Chrome)
 // ==========================================================================
-(function cleanup(){
+(function setupAppIcon(){
+  if(location.protocol === 'file:'){
+    // Em file:// o Chrome bloquearia as meta tags PWA com aviso
+    // Não injeta nada — console fica limpo
+    return;
+  }
   try{
-    document.querySelectorAll('link[rel="manifest"]').forEach(el => el.remove());
-    document.querySelectorAll(
-      'meta[name="theme-color"],' +
-      'meta[name="apple-mobile-web-app-capable"],' +
-      'meta[name="apple-mobile-web-app-status-bar-style"],' +
-      'meta[name="apple-mobile-web-app-title"],' +
-      'meta[name="mobile-web-app-capable"]'
-    ).forEach(el => el.remove());
-  }catch(e){}
+    const LOGO = 'logo.png';
+    const metas = [
+      ['apple-mobile-web-app-capable','yes'],
+      ['apple-mobile-web-app-status-bar-style','black-translucent'],
+      ['apple-mobile-web-app-title','APAVAN'],
+      ['theme-color','#0a1420'],
+      ['mobile-web-app-capable','yes']
+    ];
+    for(const [name, content] of metas){
+      const el = document.createElement('meta');
+      el.name = name; el.content = content;
+      document.head.appendChild(el);
+    }
+    const links = [
+      {rel:'apple-touch-icon', sizes:'180x180', href:LOGO},
+      {rel:'apple-touch-icon', sizes:'152x152', href:LOGO},
+      {rel:'apple-touch-icon', sizes:'120x120', href:LOGO},
+      {rel:'apple-touch-icon', sizes:'76x76',  href:LOGO},
+      {rel:'icon', type:'image/png', sizes:'32x32', href:LOGO},
+      {rel:'icon', type:'image/png', sizes:'16x16', href:LOGO}
+    ];
+    for(const l of links){
+      const el = document.createElement('link');
+      el.rel = l.rel;
+      if(l.sizes) el.setAttribute('sizes', l.sizes);
+      if(l.type) el.type = l.type;
+      el.href = l.href;
+      document.head.appendChild(el);
+    }
+    console.log('📱 Ícone APAVAN ativado (http/https)');
+  }catch(e){ console.warn('setupAppIcon:', e); }
 })();
 
-console.log('%c APAVAN v2.6 ', 'background:#00d4ff;color:#001a26;font-weight:bold;padding:2px 6px;border-radius:3px');
+console.log('%c APAVAN Pórtico Protendido v2.7 ', 'background:#00d4ff;color:#001a26;font-weight:bold;padding:2px 6px;border-radius:3px');
 
+// ==========================================================================
+// STORAGE SEGURO
+// ==========================================================================
 function safeGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function safeSet(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } }
 
@@ -700,7 +728,7 @@ function sectionStress(N,M,sec){
 }
 
 // ==========================================================================
-// ESTADO
+// ESTADO GLOBAL
 // ==========================================================================
 const state={
   model:new FrameModel(),
@@ -965,19 +993,11 @@ function drawCables(){
       const isBal = (cab.leftNodeClass === 'balLeft' || cab.leftNodeClass === 'balRight');
       ctx.fillStyle = isBal ? '#ef4444' : '#ff8a3d';
       ctx.beginPath(); ctx.arc(pts[0].x, pts[0].y, isBal?5:4.5, 0, Math.PI*2); ctx.fill();
-      // Rótulo excentricidade
-      ctx.fillStyle = '#ff8a3d';
-      ctx.font = 'bold 9px monospace';
-      ctx.fillText(`${(cab.eLeft*100).toFixed(0)}`, pts[0].x-18, pts[0].y-8);
     }
     if(cab.rightIsEnd){
       const isBal = (cab.rightNodeClass === 'balLeft' || cab.rightNodeClass === 'balRight');
       ctx.fillStyle = isBal ? '#ef4444' : '#ff8a3d';
       ctx.beginPath(); ctx.arc(pts[pts.length-1].x, pts[pts.length-1].y, isBal?5:4.5, 0, Math.PI*2); ctx.fill();
-      // Rótulo excentricidade
-      ctx.fillStyle = '#ff8a3d';
-      ctx.font = 'bold 9px monospace';
-      ctx.fillText(`${(cab.eRight*100).toFixed(0)}`, pts[pts.length-1].x+8, pts[pts.length-1].y-8);
     }
   }
 }
@@ -1277,7 +1297,7 @@ function updateZoomInfo(){
 }
 
 // ==========================================================================
-// ANIMAÇÃO
+// ANIMAÇÃO — LOOP BIDIRECIONAL
 // ==========================================================================
 let animRAF = null;
 function startAnimation(){
@@ -1494,7 +1514,7 @@ function renderSidebar(){
       <div class="panel-sec">
         <div class="panel-head">🏗 Balanços <span class="tag bal">MAIS EXCÊNTRICA</span></div>
         <div class="panel-body">
-          <div class="info-box">Viga em balanço → ancoragem mais excêntrica (junto ao topo) para combater M⁻.</div>
+          <div class="info-box">Viga em balanço → ancoragem mais excêntrica (junto ao topo).</div>
           ${hasBalEsq ? `<div class="field"><label>eBal ESQ (cm)</label>
             <input type="number" id="inEBalEsq" value="${pp.eBalEsq}" step="1"></div>`:''}
           ${hasBalDir ? `<div class="field"><label>eBal DIR (cm)</label>
@@ -1711,7 +1731,7 @@ function renderSidebar(){
             <li><b>Balanceamento</b> — w = 8·e·P/L²</li>
             <li><b>Análise K·U=F</b></li>
             <li><b>Esforços M, V, N</b></li>
-            <li><b>🎬 Simulação em loop</b> — ida e volta contínua</li>
+            <li><b>🎬 Simulação em loop</b></li>
           </ol>
         </div>
       </div>
@@ -1895,13 +1915,11 @@ function bindSidebarEvents(){
       return true;
     };
 
-    // Helper: aplica mudança e FORÇA reanálise completa
     const applyAndAnalyze = (nome, msg) => {
       if(!rebuildCables()) return;
-      state.result = null;       // invalida resultado antigo
-      runAnalysis();             // recalcula TUDO
+      state.result = null;
+      runAnalysis();
       toast(msg);
-      // NÃO chama draw() nem renderSidebar() porque runAnalysis já faz
     };
 
     if($('btnRebuild')) $('btnRebuild').onclick=()=>{
@@ -1991,7 +2009,6 @@ function bindSidebarEvents(){
       if($('inCableDiam')) $('inCableDiam').value = cord.diam_mm;
       if($('inCableArea')) $('inCableArea').value = cord.area_mm2;
     };
-    // ⚓ Ancoragens esq/dir — com reanálise forçada
     if($('btnApplyAnc')) $('btnApplyAnc').onclick=()=>{
       const vEsq = +$('inEAncEsq').value || 0;
       const vDir = +$('inEAncDir').value || 0;
@@ -1999,23 +2016,19 @@ function bindSidebarEvents(){
       state.prestress.eAncDir = vDir;
       applyAndAnalyze('anc', `✓ Ancoragens: esq ${vEsq} · dir ${vDir} cm`);
     };
-    // 🏗 Balanços — com reanálise forçada
     if($('btnApplyBal')) $('btnApplyBal').onclick=()=>{
       if($('inEBalEsq')) state.prestress.eBalEsq = +$('inEBalEsq').value || 0;
       if($('inEBalDir')) state.prestress.eBalDir = +$('inEBalDir').value || 0;
       applyAndAnalyze('bal', `✓ Balanços: esq ${state.prestress.eBalEsq} · dir ${state.prestress.eBalDir} cm`);
     };
-    // 📏 LsAnc — com reanálise forçada
     if($('btnApplyLs')) $('btnApplyLs').onclick=()=>{
       state.prestress.LsAnc = +$('inLsAnc').value || 0;
       applyAndAnalyze('ls', `✓ LsAnc = ${state.prestress.LsAnc.toFixed(2)} m`);
     };
-    // 🔺 Apoio contínuo — com reanálise forçada
     if($('btnApplySup')) $('btnApplySup').onclick=()=>{
       state.prestress.eSup = +$('inESup').value||0;
       applyAndAnalyze('sup', `✓ eSup = ${state.prestress.eSup} cm`);
     };
-    // 〰 Meio do vão — com reanálise forçada
     if($('btnApplyMid')) $('btnApplyMid').onclick=()=>{
       state.prestress.eMid = +$('inEMid').value||0;
       applyAndAnalyze('mid', `✓ eMid = ${state.prestress.eMid} cm`);
@@ -2186,7 +2199,7 @@ function showReport(){
 
     document.getElementById('modalBody').innerHTML=`
       <h2>📄 MEMÓRIA DE CÁLCULO</h2>
-      <p style="color:var(--dim);font-size:11px">APAVAN ENGENHARIA E CONSULTORIA — Pórtico Protendido v2.6</p>
+      <p style="color:var(--dim);font-size:11px">APAVAN ENGENHARIA E CONSULTORIA — Pórtico Protendido v2.7</p>
 
       <h3>1. Geometria</h3>
       <table>
@@ -2286,7 +2299,7 @@ function showReport(){
 
 function serialize(){
   return {
-    version:'2.6',
+    version:'2.7',
     model:{
       params:state.model.params,
       nodes:state.model.nodes.map(n=>({x:n.x,y:n.y,fix:n.fix,colClass:n.colClass,isGround:n.isGround})),
@@ -2453,7 +2466,7 @@ document.getElementById('btnPlay').onclick=function(){
 document.getElementById('btnResetAnim').onclick=()=>resetAnimation();
 
 // ==========================================================================
-// INICIALIZAÇÃO
+// INIT
 // ==========================================================================
 renderSidebar();
 renderLegend();
@@ -2461,7 +2474,7 @@ resizeCanvas();
 setTimeout(()=>document.getElementById('btnFit').click(),120);
 setTimeout(()=>{
   runAnalysis();
-  console.log('%c APAVAN v2.6 pronto ', 'background:#22c55e;color:#001a26;padding:2px 6px;border-radius:3px');
+  console.log('%c APAVAN v2.7 pronto ', 'background:#22c55e;color:#001a26;padding:2px 6px;border-radius:3px');
 },350);
 </script>
 </body>
